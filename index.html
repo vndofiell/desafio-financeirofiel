@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafio Financeiro</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Variáveis de tema (padrão: escuro) ── */
+  :root {
+    --bg:        #0f172a;
+    --surface:   #1e293b;
+    --surface2:  #0f172a;
+    --border:    #334155;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --muted2:    #94a3b8;
+    --accent:    #38bdf8;
+    --accent-dk: #0f172a;
+    --scrollbar: #334155;
+  }
+
+  /* Tema Claro */
+  body.tema-claro {
+    --bg:        #f1f5f9;
+    --surface:   #ffffff;
+    --surface2:  #f8fafc;
+    --border:    #e2e8f0;
+    --text:      #0f172a;
+    --muted:     #64748b;
+    --muted2:    #94a3b8;
+    --accent:    #2563eb;
+    --accent-dk: #ffffff;
+    --scrollbar: #cbd5e1;
+  }
+
+  /* Tema Roxo */
+  body.tema-roxo {
+    --bg:        #1a0533;
+    --surface:   #2d1049;
+    --surface2:  #1a0533;
+    --border:    #4a1d7a;
+    --text:      #f3e8ff;
+    --muted:     #9f6fc4;
+    --muted2:    #c084fc;
+    --accent:    #a855f7;
+    --accent-dk: #1a0533;
+    --scrollbar: #4a1d7a;
+  }
+
+  /* Tema Verde */
+  body.tema-verde {
+    --bg:        #052e16;
+    --surface:   #14532d;
+    --surface2:  #052e16;
+    --border:    #166534;
+    --text:      #dcfce7;
+    --muted:     #4ade80;
+    --muted2:    #86efac;
+    --accent:    #4ade80;
+    --accent-dk: #052e16;
+    --scrollbar: #166534;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ══════════════ LOGIN ══════════════ */
+  #loginScreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 60% 40%, var(--surface) 0%, var(--bg) 70%);
+  }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 56px;
+    width: 380px;
+    text-align: center;
+    transition: background 0.3s;
+  }
+  .login-box h2 {
+    font-size: 1.7rem;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .login-box p {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 32px;
+  }
+  .login-box label {
+    display: block;
+    text-align: left;
+    font-size: 0.78rem;
+    color: var(--muted2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.95rem;
+    margin-bottom: 18px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-box input:focus { border-color: var(--accent); }
+  .login-box .btn-login {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: var(--accent-dk);
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: opacity 0.2s;
+  }
+  .login-box .btn-login:hover { opacity: 0.85; }
+  .login-error {
+    color: #f87171;
+    font-size: 0.84rem;
+    margin-top: 10px;
+    min-height: 18px;
+  }
+
+  /* ══════════════ DASHBOARD ══════════════ */
+  #dashScreen {
+    display: none;
+    width: 100%; height: 100%;
+    flex-direction: column;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 54px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    gap: 12px;
+    transition: background 0.3s;
+  }
+  .topbar .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .topbar .user  { font-size: 0.85rem; color: var(--muted2); white-space: nowrap; }
+  .topbar .btn-sair {
+    padding: 6px 16px;
+    background: var(--border);
+    border: none;
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.82rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .topbar .btn-sair:hover { background: #ef4444; color: #fff; }
+
+  /* ── Seletor de tema ── */
+  .tema-select {
+    padding: 5px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.82rem;
+    cursor: pointer;
+    outline: none;
+    white-space: nowrap;
+  }
+
+  /* ── Abas de navegação ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+  }
+  .tab-btn {
+    padding: 6px 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover   { color: var(--text); border-color: var(--accent); }
+  .tab-btn.active  { background: var(--accent); color: var(--accent-dk); border-color: var(--accent); }
+
+  /* ── Painéis de aba ── */
+  .tab-panel { display: none; flex: 1; overflow: hidden; }
+  .tab-panel.active { display: flex; }
+
+  /* ══════════════ POUPANÇA ══════════════ */
+  .poupanca-wrap {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* painel esquerdo poupança */
+  .poup-left {
+    width: 300px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    gap: 14px;
+    overflow-y: auto;
+    transition: background 0.3s;
+  }
+
+  .poup-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .card.entrada .value { color: #4ade80; }
+  .card.saida   .value { color: #f87171; }
+  .card.saldo-p .value { color: #38bdf8; }
+
+  /* formulário nova movimentação */
+  .form-mov {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .form-mov .form-title {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  .form-mov input,
+  .form-mov select {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-mov input:focus,
+  .form-mov select:focus { border-color: var(--accent); }
+  .form-mov select option { background: var(--surface); }
+  .form-mov .tipo-row {
+    display: flex;
+    gap: 8px;
+  }
+  .tipo-btn {
+    flex: 1;
+    padding: 8px;
+    border: 2px solid var(--border);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tipo-btn.entrada-sel { border-color: #4ade80; color: #4ade80; background: #14532d; }
+  .tipo-btn.saida-sel   { border-color: #f87171; color: #f87171; background: #450a0a; }
+  .btn-add-mov {
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: var(--accent-dk);
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-add-mov:hover { opacity: 0.85; }
+
+  /* painel direito poupança — extrato */
+  .poup-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow: hidden;
+  }
+  .extrato-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+  }
+  .extrato-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .btn-limpar-extrato {
+    padding: 5px 14px;
+    background: var(--border);
+    border: none;
+    border-radius: 6px;
+    color: var(--muted2);
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+  .btn-limpar-extrato:hover { background: #ef4444; color: #fff; }
+
+  .extrato-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .extrato-scroll::-webkit-scrollbar { width: 5px; }
+  .extrato-scroll::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 999px; }
+
+  .mov-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .mov-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .mov-info { flex: 1; }
+  .mov-desc { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+  .mov-data { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+  .mov-valor { font-size: 1rem; font-weight: 700; white-space: nowrap; }
+  .mov-valor.e { color: #4ade80; }
+  .mov-valor.s { color: #f87171; }
+  .mov-del {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s;
+  }
+  .mov-del:hover { color: #f87171; }
+  .extrato-vazio {
+    text-align: center;
+    color: var(--border);
+    font-size: 0.9rem;
+    margin-top: 60px;
+  }
+
+  /* ══════════════ CONFIGURAÇÕES ══════════════ */
+  .config-wrap {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+  .config-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 40px;
+    width: 100%;
+    max-width: 440px;
+    transition: background 0.3s;
+  }
+  .config-card h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .config-card .sub {
+    font-size: 0.83rem;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .config-card .field-label {
+    font-size: 0.75rem;
+    color: var(--muted2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  .config-card input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .config-card input:focus { border-color: var(--accent); }
+  .config-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+  .config-card .btn-salvar {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: var(--accent);
+    color: var(--accent-dk);
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .config-card .btn-salvar:hover { opacity: 0.85; }
+  .config-msg {
+    margin-top: 12px;
+    font-size: 0.84rem;
+    min-height: 18px;
+    text-align: center;
+  }
+  .config-msg.ok    { color: #4ade80; }
+  .config-msg.erro  { color: #f87171; }
+
+  /* ── Corpo principal (2 colunas) ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* ── Painel esquerdo (sidebar de stats) ── */
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    gap: 14px;
+    overflow-y: auto;
+    transition: background 0.3s;
+  }
+  .card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: background 0.3s;
+  }
+  .card .label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .card .value {
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  .card.azul   .value { color: #38bdf8; }
+  .card.verde  .value { color: #4ade80; }
+  .card.laranja .value { color: #fb923c; }
+  .card.roxo   .value { color: #a78bfa; }
+
+  /* barra de progresso na sidebar */
+  .prog-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .bar-bg {
+    background: var(--border);
+    border-radius: 999px;
+    height: 14px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #4ade80);
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+  .bar-pct {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #4ade80;
+  }
+
+  /* campo de depósito rápido */
+  .deposito-rapido {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .deposito-rapido .label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .deposito-rapido .input-row {
+    display: flex;
+    gap: 6px;
+  }
+  .deposito-rapido input {
+    flex: 1;
+    padding: 8px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 0;
+  }
+  .deposito-rapido input:focus { border-color: var(--accent); }
+  .deposito-rapido .btn-dep {
+    padding: 8px 12px;
+    background: var(--accent);
+    color: var(--accent-dk);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .deposito-rapido .btn-dep:hover { opacity: 0.85; }
+  .dep-feedback {
+    margin-top: 8px;
+    font-size: 0.78rem;
+    min-height: 16px;
+    color: #4ade80;
+  }
+  .dep-feedback.erro { color: #f87171; }
+
+  /* botões da sidebar */
+  .sidebar-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+  }
+  .sb-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .sb-btn:hover { opacity: 0.8; }
+  .btn-all   { background: #4ade80; color: #052e16; }
+  .btn-none  { background: #334155; color: #e2e8f0; }
+  .btn-reset { background: #ef4444; color: white; }
+
+  /* ── Painel direito (grid) ── */
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow: hidden;
+  }
+  .content-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+  }
+  .grid-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .grid-scroll::-webkit-scrollbar { width: 5px; }
+  .grid-scroll::-webkit-scrollbar-track { background: transparent; }
+  .grid-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+    gap: 7px;
+  }
+  .item {
+    border: 2px solid #334155;
+    border-radius: 8px;
+    padding: 11px 4px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    transition: all 0.18s;
+    user-select: none;
+  }
+  .item:hover { transform: translateY(-2px); filter: brightness(1.3); }
+
+  /* cores por grupo de valor */
+  .g10  { background:#1e293b; color:#93c5fd; border-color:#1d4ed8; }
+  .g20  { background:#1e293b; color:#6ee7b7; border-color:#047857; }
+  .g30  { background:#1e293b; color:#fde68a; border-color:#b45309; }
+  .g50  { background:#1e293b; color:#f9a8d4; border-color:#9d174d; }
+  .g100 { background:#1e293b; color:#d8b4fe; border-color:#6d28d9; }
+  .gX   { background:#1e293b; color:#94a3b8; border-color:#334155; }
+
+  .item.checked             { filter: brightness(1.8); }
+  .item.checked.g10         { background:#1d4ed8; color:#fff; }
+  .item.checked.g20         { background:#047857; color:#fff; }
+  .item.checked.g30         { background:#b45309; color:#fff; }
+  .item.checked.g50         { background:#9d174d; color:#fff; }
+  .item.checked.g100        { background:#6d28d9; color:#fff; }
+  .item.checked.gX          { background:#334155; color:#fff; }
+</style>
+</head>
+<body>
+
+<!-- ══ TELA DE CONFIGURAÇÃO ══ -->
+<div id="configScreen" style="
+  display:flex; align-items:center; justify-content:center;
+  width:100%; height:100%;
+  background:radial-gradient(ellipse at 60% 40%, var(--surface) 0%, var(--bg) 70%);">
+  <div style="
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:24px; padding:56px 64px; width:460px;
+    text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.4);">
+    <div style="font-size:3rem;margin-bottom:16px;">&#128176;</div>
+    <h1 style="font-size:1.9rem;color:var(--accent);margin-bottom:8px;">Desafio Financeiro</h1>
+    <p style="color:var(--muted);font-size:.95rem;margin-bottom:36px;line-height:1.6;">
+      Quanto voce quer juntar?<br>Digite o valor total do seu objetivo.
+    </p>
+    <div id="cfgWrap" style="display:flex;align-items:center;background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:4px 4px 4px 16px;margin-bottom:12px;transition:border-color .2s;">
+      <span style="font-size:1.1rem;font-weight:700;color:var(--accent);margin-right:8px;white-space:nowrap;">R$</span>
+      <input type="number" id="cfgValorInicial" placeholder="0,00" min="1" step="0.01"
+             autofocus
+             onfocus="document.getElementById('cfgWrap').style.borderColor='var(--accent)'"
+             onblur="document.getElementById('cfgWrap').style.borderColor='var(--border)'"
+             onkeydown="if(event.key==='Enter') iniciarDesafio()"
+             style="flex:1;background:none;border:none;outline:none;font-size:1.4rem;font-weight:700;color:var(--text);padding:10px 0;" />
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:28px;">
+      <button onclick="setCfgVal(1000)"  style="padding:6px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.82rem;cursor:pointer;">R$ 1.000</button>
+      <button onclick="setCfgVal(3000)"  style="padding:6px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.82rem;cursor:pointer;">R$ 3.000</button>
+      <button onclick="setCfgVal(5000)"  style="padding:6px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.82rem;cursor:pointer;">R$ 5.000</button>
+      <button onclick="setCfgVal(6000)"  style="padding:6px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.82rem;cursor:pointer;">R$ 6.000</button>
+      <button onclick="setCfgVal(10000)" style="padding:6px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.82rem;cursor:pointer;">R$ 10.000</button>
+      <button onclick="setCfgVal(20000)" style="padding:6px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.82rem;cursor:pointer;">R$ 20.000</button>
+    </div>
+    <button onclick="iniciarDesafio()" style="width:100%;padding:16px;background:var(--accent);color:var(--accent-dk);font-size:1.1rem;font-weight:700;border:none;border-radius:12px;cursor:pointer;">
+      Criar Meu Desafio
+    </button>
+    <div id="cfgErro" style="color:#f87171;font-size:.85rem;margin-top:10px;min-height:18px;"></div>
+  </div>
+</div>
+
+<!-- ══ TELA DE LOGIN ══ -->
+<div id="loginScreen" style="display:none;">
+  <div class="login-box">
+    <h2>💰 Desafio</h2>
+    <p>Faça login para acessar seu dashboard</p>
+
+    <label>Usuário</label>
+    <input type="text" id="inUser" placeholder="Digite seu usuário" />
+
+    <label>Senha</label>
+    <input type="password" id="inPass" placeholder="••••••••"
+           onkeydown="if(event.key==='Enter') fazerLogin()" />
+
+    <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+    <div class="login-error" id="loginErr"></div>
+    <button onclick="resetarCredenciais()" style="
+      margin-top:14px; background:none; border:none;
+      color:var(--muted); font-size:0.75rem; cursor:pointer;
+      text-decoration:underline;">
+      Esqueci minha senha / Redefinir acesso
+    </button>
+  </div>
+</div>
+
+<!-- ══ TELA DO DASHBOARD ══ -->
+<div id="dashScreen">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <span class="logo">💰 Desafio</span>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="mudarAba('desafio')">🎯 Desafio</button>
+      <button class="tab-btn"        onclick="mudarAba('poupanca')">🏦 Poupança</button>
+      <button class="tab-btn"        onclick="mudarAba('config')">⚙️ Conta</button>
+    </div>
+    <span class="user" id="userLabel"></span>
+    <select class="tema-select" id="temaSelect" onchange="trocarTema(this.value)">
+      <option value="">🎨 Tema</option>
+      <option value="escuro">🌑 Escuro</option>
+      <option value="claro">☀️ Claro</option>
+      <option value="roxo">🟣 Roxo</option>
+      <option value="verde">🌿 Verde</option>
+    </select>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+
+  <!-- ══ ABA: DESAFIO ══ -->
+  <div class="tab-panel active" id="tabDesafio">
+  <div class="main">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="card azul" style="position:relative;">
+        <div class="label">Objetivo</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div class="value" id="cObjetivo">—</div>
+          <button onclick="abrirModalObjetivo()" title="Alterar objetivo" style="
+            background:none;border:none;cursor:pointer;
+            color:var(--muted);font-size:1rem;padding:2px 4px;
+            border-radius:4px;flex-shrink:0;transition:color 0.2s;">✏️</button>
+        </div>
+      </div>
+      <div class="card verde">
+        <div class="label">Acumulado</div>
+        <div class="value" id="cAcumulado">—</div>
+      </div>
+      <div class="card laranja">
+        <div class="label">Faltam</div>
+        <div class="value" id="cFaltam">—</div>
+      </div>
+      <div class="card roxo">
+        <div class="label">Depósitos</div>
+        <div class="value" id="cDepositos">—</div>
+      </div>
+
+      <!-- Progresso -->
+      <div>
+        <div class="prog-label">
+          <span>Progresso</span>
+          <span id="pctLabel">0%</span>
+        </div>
+        <div class="bar-bg">
+          <div class="bar-fill" id="barFill"></div>
+        </div>
+        <div class="bar-pct" id="barPct">0% concluído</div>
+      </div>
+
+      <!-- Depósito Rápido -->
+      <div class="deposito-rapido">
+        <div class="label">⚡ Depósito Rápido</div>
+        <div class="input-row">
+          <input type="number" id="inDeposito" placeholder="R$ valor" min="1"
+                 onkeydown="if(event.key==='Enter') depositar()" />
+          <button class="btn-dep" onclick="depositar()">OK</button>
+        </div>
+        <div class="dep-feedback" id="depFeedback"></div>
+      </div>
+
+      <!-- Botões -->
+      <div class="sidebar-btns">
+        <button class="sb-btn btn-all"   onclick="marcarTodos()">✅ Marcar todos</button>
+        <button class="sb-btn btn-none"  onclick="desmarcarTodos()">⬜ Desmarcar todos</button>
+        <button class="sb-btn btn-reset" onclick="resetar()">🗑️ Reiniciar</button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="content">
+      <div class="content-title">📋 Depósitos — clique para marcar</div>
+      <div class="grid-scroll">
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+
+  </div>
+  </div><!-- fim tabDesafio -->
+
+  <!-- ══ ABA: POUPANÇA ══ -->
+  <div class="tab-panel" id="tabPoupanca">
+  <div class="poupanca-wrap">
+
+    <!-- Painel esquerdo: resumo + formulário -->
+    <div class="poup-left">
+
+      <!-- Cards de resumo -->
+      <div class="poup-cards">
+        <div class="card entrada">
+          <div class="label">Total Entradas</div>
+          <div class="value" id="pTotalEntradas">R$ 0,00</div>
+        </div>
+        <div class="card saida">
+          <div class="label">Total Saídas</div>
+          <div class="value" id="pTotalSaidas">R$ 0,00</div>
+        </div>
+        <div class="card saldo-p">
+          <div class="label">Saldo Atual</div>
+          <div class="value" id="pSaldo">R$ 0,00</div>
+        </div>
+      </div>
+
+      <!-- Formulário nova movimentação -->
+      <div class="form-mov">
+        <div class="form-title">➕ Nova Movimentação</div>
+
+        <div class="tipo-row">
+          <button class="tipo-btn entrada-sel" id="btnEntrada" onclick="selecionarTipo('entrada')">⬆ Entrada</button>
+          <button class="tipo-btn"             id="btnSaida"   onclick="selecionarTipo('saida')">⬇ Saída</button>
+        </div>
+
+        <input type="text"   id="movDesc"  placeholder="Descrição (ex: Salário, Aluguel...)" />
+        <input type="number" id="movValor" placeholder="Valor R$" min="0.01" step="0.01"
+               onkeydown="if(event.key==='Enter') adicionarMov()" />
+        <input type="date"   id="movData" />
+
+        <button class="btn-add-mov" onclick="adicionarMov()">Registrar</button>
+      </div>
+
+    </div>
+
+    <!-- Painel direito: extrato -->
+    <div class="poup-right">
+      <div class="extrato-header">
+        <span class="extrato-title">📄 Extrato de Movimentações</span>
+        <button class="btn-limpar-extrato" onclick="limparExtrato()">🗑 Limpar tudo</button>
+      </div>
+      <div class="extrato-scroll" id="extrato"></div>
+    </div>
+
+  </div>
+  </div><!-- fim tabPoupanca -->
+
+  <!-- ══ ABA: CONFIGURAÇÕES ══ -->
+  <div class="tab-panel" id="tabConfig">
+  <div class="config-wrap">
+    <div class="config-card">
+      <h2>⚙️ Configurações da Conta</h2>
+      <p class="sub">Altere seu usuário e senha de acesso ao sistema.</p>
+
+      <div class="field-label">Usuário atual</div>
+      <input type="text" id="cfgUsuarioAtual" placeholder="Usuário atual" />
+
+      <div class="field-label">Senha atual</div>
+      <input type="password" id="cfgSenhaAtual" placeholder="Senha atual" />
+
+      <div class="config-divider"></div>
+
+      <div class="field-label">Novo usuário</div>
+      <input type="text" id="cfgNovoUsuario" placeholder="Novo usuário (deixe em branco para manter)" />
+
+      <div class="field-label">Nova senha</div>
+      <input type="password" id="cfgNovaSenha" placeholder="Nova senha (deixe em branco para manter)" />
+
+      <div class="field-label">Confirmar nova senha</div>
+      <input type="password" id="cfgConfirmaSenha" placeholder="Repita a nova senha"
+             onkeydown="if(event.key==='Enter') salvarConta()" />
+
+      <button class="btn-salvar" onclick="salvarConta()">💾 Salvar Alterações</button>
+      <div class="config-msg" id="cfgMsg"></div>
+    </div>
+  </div>
+  </div><!-- fim tabConfig -->
+
+  <!-- ══ MODAL: ALTERAR OBJETIVO ══ -->
+  <div id="modalObjetivo" style="
+    display:none; position:fixed; inset:0; z-index:999;
+    background:rgba(0,0,0,0.7);
+    align-items:center; justify-content:center;">
+    <div style="
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:20px; padding:36px 40px; width:440px;
+      text-align:center; position:relative;">
+      <h2 style="color:var(--accent);font-size:1.2rem;margin-bottom:18px;">🎯 Alterar Meta</h2>
+
+      <!-- Modo: trocar ou expandir -->
+      <div style="display:flex;gap:8px;margin-bottom:18px;">
+        <button id="modoTrocar" onclick="setModoObjetivo('trocar')" style="
+          flex:1;padding:9px;border:2px solid var(--accent);border-radius:8px;
+          background:var(--accent);color:var(--accent-dk);font-weight:700;font-size:0.85rem;cursor:pointer;">
+          🔄 Trocar meta
+        </button>
+        <button id="modoExpandir" onclick="setModoObjetivo('expandir')" style="
+          flex:1;padding:9px;border:2px solid var(--border);border-radius:8px;
+          background:transparent;color:var(--muted);font-weight:700;font-size:0.85rem;cursor:pointer;">
+          ➕ Expandir meta
+        </button>
+      </div>
+      <p id="modalDesc" style="color:var(--muted);font-size:0.82rem;margin-bottom:16px;min-height:32px;line-height:1.5;">
+        Reinicia os quadros do zero com a nova meta.
+      </p>
+
+      <!-- Quick-picks -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;">
+        <button onclick="setModalVal(1000)"  style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 1.000</button>
+        <button onclick="setModalVal(3000)"  style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 3.000</button>
+        <button onclick="setModalVal(5000)"  style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 5.000</button>
+        <button onclick="setModalVal(6000)"  style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 6.000</button>
+        <button onclick="setModalVal(10000)" style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 10.000</button>
+        <button onclick="setModalVal(20000)" style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 20.000</button>
+      </div>
+
+      <!-- Input de valor -->
+      <div style="display:flex;align-items:center;background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:4px 4px 4px 14px;margin-bottom:8px;transition:border-color .2s" id="modalWrap">
+        <span style="font-size:1rem;font-weight:700;color:var(--accent);margin-right:8px;white-space:nowrap">R$</span>
+        <input type="number" id="modalValor" placeholder="0,00" min="1" step="0.01"
+               onkeydown="if(event.key==='Enter') confirmarNovoObjetivo()"
+               onfocus="document.getElementById('modalWrap').style.borderColor='var(--accent)'"
+               onblur="document.getElementById('modalWrap').style.borderColor='var(--border)'"
+               style="flex:1;background:none;border:none;outline:none;font-size:1.3rem;font-weight:700;color:var(--text);padding:10px 0;" />
+      </div>
+      <div id="modalErro" style="color:#f87171;font-size:0.82rem;min-height:18px;margin-bottom:14px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="fecharModalObjetivo()" style="
+          flex:1;padding:12px;background:var(--border);border:none;
+          border-radius:8px;color:var(--text);font-weight:600;cursor:pointer;">
+          Cancelar
+        </button>
+        <button onclick="confirmarNovoObjetivo()" style="
+          flex:1;padding:12px;background:var(--accent);border:none;
+          border-radius:8px;color:var(--accent-dk);font-weight:700;cursor:pointer;">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Credenciais — salvas no localStorage para permitir alteração ──
+  const CHAVE_USERS = 'desafio_usuarios_v1';
+  const USUARIOS_PADRAO = { "admin": "1234", "vando": "vando123" };
+
+  function carregarUsuarios() {
+    try {
+      const raw = localStorage.getItem(CHAVE_USERS);
+      if (!raw) return { ...USUARIOS_PADRAO };
+      const parsed = JSON.parse(raw);
+      // Valida que é um objeto com pelo menos uma chave
+      if (typeof parsed === 'object' && parsed !== null && Object.keys(parsed).length > 0) {
+        return parsed;
+      }
+      return { ...USUARIOS_PADRAO };
+    } catch(e) {
+      localStorage.removeItem(CHAVE_USERS);
+      return { ...USUARIOS_PADRAO };
+    }
+  }
+
+  let USUARIOS = carregarUsuarios();
+
+  let valoresBase = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100];
+
+  // Storage keys — derived dynamically from the actual saved goal
+  let CHAVE_M  = 'desafio_v4_marcados_6000';
+  let CHAVE_A  = 'desafio_v4_ajustes_6000';
+  let CHAVE_E  = 'desafio_v4_extras_6000';
+
+  // `valores` pode crescer com quadros extras gerados automaticamente
+  let valores  = [...valoresBase];
+  let marcados = new Set();
+  let ajustes  = {};  // índice -> valor ajustado (persistido)
+  let extras   = [];    // quadros criados além dos originais (persistido)
+
+  // Módulo Poupança — declarado aqui para estar disponível em todo o script
+  const CHAVE_MOVS = 'poupanca_movs_v1';
+  let movs = [];
+  let tipoSelecionado = 'entrada';
+
+  // ══ TELA DE CONFIGURAÇÃO ══
+  const CHAVE_OBJ_INICIAL = 'desafio_objetivo_inicial';
+
+  function setCfgVal(v) {
+    document.getElementById('cfgValorInicial').value = v;
+    document.getElementById('cfgErro').innerText = '';
+  }
+
+  function iniciarDesafio() {
+    const raw = document.getElementById('cfgValorInicial').value.trim().replace(',', '.');
+    const val = parseFloat(raw);
+    if (isNaN(val) || val < 1) {
+      document.getElementById('cfgErro').innerText = 'Digite um valor valido (minimo R$ 1,00).';
+      return;
+    }
+    // If goal changed, wipe all old challenge data from localStorage
+    const objAnterior = parseFloat(localStorage.getItem(CHAVE_OBJ_INICIAL));
+    if (!isNaN(objAnterior) && objAnterior !== val) {
+      const mAnt = 'desafio_v4_marcados_' + objAnterior;
+      const aAnt = 'desafio_v4_ajustes_'  + objAnterior;
+      const eAnt = 'desafio_v4_extras_'   + objAnterior;
+      localStorage.removeItem(mAnt);
+      localStorage.removeItem(aAnt);
+      localStorage.removeItem(eAnt);
+    }
+    // Salva o objetivo inicial e vai para a tela de login
+    localStorage.setItem(CHAVE_OBJ_INICIAL, val);
+    // Update dynamic storage keys
+    CHAVE_M = 'desafio_v4_marcados_' + val;
+    CHAVE_A = 'desafio_v4_ajustes_'  + val;
+    CHAVE_E = 'desafio_v4_extras_'   + val;
+    // Reset runtime state
+    extras   = [];
+    marcados = new Set();
+    ajustes  = {};
+    // Reconstrói os quadros com o novo objetivo
+    gerarQuadros(val);
+    // Mostra tela de login
+    document.getElementById('configScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display  = 'flex';
+    setTimeout(() => document.getElementById('inUser').focus(), 50);
+  }
+
+  // Gera os valoresBase dinamicamente via JS (mesma lógica do Python gerar_grupos)
+  function gerarQuadros(obj) {
+    const grupos = [[10,20],[20,20],[30,30],[50,30],[100,30]];
+    const escala = obj / 6000;
+    let vals = [];
+    grupos.forEach(([val, qtdBase]) => {
+      const qtd = Math.max(1, Math.round(qtdBase * escala));
+      for (let k = 0; k < qtd; k++) vals.push(val);
+    });
+    let soma = vals.reduce((s,v) => s+v, 0);
+    let diff = Math.round((soma - obj) * 100) / 100;
+    if (diff > 0) {
+      vals[vals.length-1] = Math.round((vals[vals.length-1] - diff) * 100) / 100;
+      if (vals[vals.length-1] <= 0) vals.pop();
+    } else if (diff < 0) {
+      vals.push(Math.round(-diff * 100) / 100);
+    }
+    // Atualiza as variáveis globais
+    valoresBase.length = 0;
+    vals.forEach(v => valoresBase.push(v));
+    window._objetivoAtual = obj;
+    valores = [...valoresBase, ...extras];
+  }
+
+  // Inicialização: decide qual tela mostrar
+  (function() {
+    const t = localStorage.getItem('tema_desafio') || 'escuro';
+    document.body.className = t && t !== 'escuro' ? 'tema-' + t : '';
+    // Se já tem objetivo salvo, pula a tela de configuração
+    const objSalvo = parseFloat(localStorage.getItem(CHAVE_OBJ_INICIAL));
+    if (!isNaN(objSalvo) && objSalvo >= 1) {
+      // Update dynamic storage keys to match the saved goal
+      CHAVE_M = 'desafio_v4_marcados_' + objSalvo;
+      CHAVE_A = 'desafio_v4_ajustes_'  + objSalvo;
+      CHAVE_E = 'desafio_v4_extras_'   + objSalvo;
+      gerarQuadros(objSalvo);
+      document.getElementById('configScreen').style.display = 'none';
+      document.getElementById('loginScreen').style.display  = 'flex';
+    }
+  })();
+
+  // ── Login ──
+  function fazerLogin() {
+    const u = document.getElementById('inUser').value.trim();
+    const p = document.getElementById('inPass').value;
+
+    // Recarrega usuários do localStorage na hora do login (garante dados frescos)
+    USUARIOS = carregarUsuarios();
+
+    if (USUARIOS[u] && USUARIOS[u] === p) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashScreen').style.display  = 'flex';
+      document.getElementById('userLabel').innerText = '👤 ' + u;
+      // Ensure keys match the saved goal before loading data
+      const _obj = parseFloat(localStorage.getItem(CHAVE_OBJ_INICIAL)) || window._objetivoAtual || 6000;
+      CHAVE_M = 'desafio_v4_marcados_' + _obj;
+      CHAVE_A = 'desafio_v4_ajustes_'  + _obj;
+      CHAVE_E = 'desafio_v4_extras_'   + _obj;
+      // Carrega dados salvos
+      try { extras   = JSON.parse(localStorage.getItem(CHAVE_E) || '[]'); } catch(e) { extras = []; }
+      try { marcados = new Set(JSON.parse(localStorage.getItem(CHAVE_M) || '[]')); } catch(e) { marcados = new Set(); }
+      try { ajustes  = JSON.parse(localStorage.getItem(CHAVE_A) || '{}'); } catch(e) { ajustes = {}; }
+      // Restaura objetivo customizado se existir
+      const objSalvo = parseFloat(localStorage.getItem('desafio_v4_objetivo_' + _obj));
+      if (!isNaN(objSalvo) && objSalvo > _obj) window._objetivoAtual = objSalvo;
+      valores = [...valoresBase, ...extras];
+      expandirSeNecessario();
+      renderGrid();
+      // Tema — chamado depois do renderGrid para garantir que tudo está no DOM
+      const temaSalvo = localStorage.getItem('tema_desafio') || 'escuro';
+      const sel = document.getElementById('temaSelect');
+      document.body.className = temaSalvo && temaSalvo !== 'escuro' ? 'tema-' + temaSalvo : '';
+      if (sel) sel.value = temaSalvo;
+    } else {
+      document.getElementById('loginErr').innerText = '❌ Usuário ou senha incorretos.';
+    }
+  }
+
+  function sair() {
+    document.getElementById('dashScreen').style.display  = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('inUser').value = '';
+    document.getElementById('inPass').value = '';
+    document.getElementById('loginErr').innerText = '';
+  }
+
+  function resetarCredenciais() {
+    if (confirm('Redefinir acesso para: admin/1234 e vando/vando123 ?')) {
+      localStorage.removeItem(CHAVE_USERS);
+      USUARIOS = { ...USUARIOS_PADRAO };
+      const err = document.getElementById('loginErr');
+      err.style.color = '#4ade80';
+      err.innerText = 'Credenciais redefinidas! Use admin / 1234';
+    }
+  }
+
+  // ── Helpers ──
+  function fmt(v) {
+    return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  // Salva marcados, ajustes e extras
+  function salvar() {
+    localStorage.setItem(CHAVE_M, JSON.stringify([...marcados]));
+    localStorage.setItem(CHAVE_A, JSON.stringify(ajustes));
+    localStorage.setItem(CHAVE_E, JSON.stringify(extras));
+  }
+
+  // Valor real de um quadrado (ajustado ou original)
+  function valorReal(i) {
+    return ajustes[i] !== undefined ? ajustes[i] : valores[i];
+  }
+
+  // ── Atualiza cards e barra ──
+  function atualizar() {
+    let soma = 0;
+    marcados.forEach(i => soma += valorReal(i));
+    const obj = getObjetivo();
+    const pct = Math.min((soma / obj) * 100, 100);
+
+    document.getElementById('cObjetivo').innerText  = fmt(obj);
+    document.getElementById('cAcumulado').innerText = fmt(soma);
+    document.getElementById('cFaltam').innerText    = fmt(Math.max(obj - soma, 0));
+    document.getElementById('cDepositos').innerText = marcados.size + ' / ' + valores.length;
+    document.getElementById('barFill').style.width  = pct + '%';
+    document.getElementById('pctLabel').innerText   = Math.round(pct) + '%';
+    document.getElementById('barPct').innerText     = Math.round(pct) + '% concluido';
+  }
+
+  // Retorna a classe CSS de cor conforme o valor do quadro
+  function classeGrupo(v) {
+    if (v <= 10)  return 'g10';
+    if (v <= 20)  return 'g20';
+    if (v <= 30)  return 'g30';
+    if (v <= 50)  return 'g50';
+    if (v <= 100) return 'g100';
+    return 'gX';
+  }
+
+  // ── Registra movimentação automática na Poupança ──
+  function registrarMovPoupanca(tipo, valor, desc) {
+    movs = JSON.parse(localStorage.getItem(CHAVE_MOVS) || '[]');
+    const hoje = new Date().toISOString().split('T')[0];
+    movs.unshift({
+      id:    Date.now(),
+      tipo,
+      desc,
+      valor: Math.round(valor * 100) / 100,
+      data:  hoje
+    });
+    localStorage.setItem(CHAVE_MOVS, JSON.stringify(movs));
+    // Se a aba poupança estiver visível, atualiza o extrato
+    if (document.getElementById('tabPoupanca').classList.contains('active')) {
+      renderExtrato();
+    }
+  }
+
+  // ── Renderiza o grid ──
+  function renderGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    valores.forEach((v, i) => {
+      const g = classeGrupo(valorReal(i));
+      const d = document.createElement('div');
+      d.className = 'item ' + g + (marcados.has(i) ? ' checked' : '');
+      d.innerText = valorReal(i);
+      d.onclick = () => {
+        const estavaMarcado = marcados.has(i);
+        estavaMarcado ? marcados.delete(i) : marcados.add(i);
+        d.className = 'item ' + g + (marcados.has(i) ? ' checked' : '');
+        salvar(); atualizar();
+        // Integração com Poupança
+        const v = valorReal(i);
+        if (!estavaMarcado) {
+          registrarMovPoupanca('entrada', v, `Desafio — quadro R$ ${v}`);
+        } else {
+          registrarMovPoupanca('saida', v, `Desafio — estorno quadro R$ ${v}`);
+        }
+      };
+      grid.appendChild(d);
+    });
+    atualizar();
+  }
+
+  function marcarTodos() {
+    // Calcula apenas os que NÃO estavam marcados antes (para registrar só o novo valor)
+    let somaAntes = 0;
+    marcados.forEach(i => somaAntes += valorReal(i));
+
+    valores.forEach((_, i) => marcados.add(i));
+    salvar();
+    renderGrid();
+
+    // Registra a diferença como entrada na Poupança
+    let somaDepois = 0;
+    marcados.forEach(i => somaDepois += valorReal(i));
+    const diff = Math.round((somaDepois - somaAntes) * 100) / 100;
+    if (diff > 0) {
+      registrarMovPoupanca('entrada', diff, `Desafio — marcar todos (${fmt(diff)})`);
+    }
+  }
+
+  function desmarcarTodos() {
+    // Calcula o total que estava marcado para registrar como saída
+    let somaAntes = 0;
+    marcados.forEach(i => somaAntes += valorReal(i));
+
+    marcados.clear();
+    salvar();
+    renderGrid();
+
+    if (somaAntes > 0) {
+      registrarMovPoupanca('saida', somaAntes, `Desafio — desmarcar todos (${fmt(somaAntes)})`);
+    }
+  }
+
+  function resetar() {
+    if (confirm('Deseja realmente zerar todo o progresso?')) {
+      // Registra saída do total antes de zerar
+      let somaAntes = 0;
+      marcados.forEach(i => somaAntes += valorReal(i));
+      if (somaAntes > 0) {
+        registrarMovPoupanca('saida', somaAntes, `Desafio — reiniciar (${fmt(somaAntes)})`);
+      }
+      marcados.clear();
+      ajustes  = {};
+      extras   = [];
+      valores  = [...valoresBase];
+      localStorage.removeItem(CHAVE_M);
+      localStorage.removeItem(CHAVE_A);
+      localStorage.removeItem(CHAVE_E);
+      renderGrid();
+    }
+  }
+
+  // ── Expande o grid automaticamente quando todos os quadros acabam e ainda falta valor ──
+  function expandirSeNecessario() {
+    let somaTotal = 0;
+    valores.forEach((v, i) => somaTotal += valorReal(i));
+    const _objAtual = getObjetivo();
+    if (somaTotal >= _objAtual) return; // já cobre o objetivo, sem necessidade
+
+    const falta = Math.round((_objAtual - somaTotal) * 100) / 100;
+    if (falta < 0.01) return;
+
+    // Descobre o próximo número da sequência
+    const proximoNum = valores.length + 1;
+
+    // Divide o valor restante em quadros com valores sequenciais a partir de proximoNum
+    // Estratégia: cria quadros proximoNum, proximoNum+1, ... até cobrir exatamente o falta
+    let acum = 0;
+    let num  = proximoNum;
+    const novos = [];
+
+    while (acum < falta - 0.005) {
+      const v = Math.min(num, Math.round((falta - acum) * 100) / 100);
+      novos.push(v);
+      acum = Math.round((acum + v) * 100) / 100;
+      num++;
+    }
+
+    novos.forEach(v => extras.push(v));
+    valores = [...valoresBase, ...extras];
+    salvar();
+    renderGrid();
+  }
+
+  // ── Depósito Rápido ──
+  function depositar() {
+    const fb  = document.getElementById('depFeedback');
+    const raw = document.getElementById('inDeposito').value.trim().replace(',', '.');
+    const val = parseFloat(raw);
+
+    if (isNaN(val) || val <= 0) {
+      fb.className = 'dep-feedback erro';
+      fb.innerText = '❌ Digite um valor válido.';
+      return;
+    }
+
+    // Verifica se o valor não ultrapassa o que falta
+    let somaAtual = 0;
+    marcados.forEach(i => somaAtual += valorReal(i));
+    const falta = getObjetivo() - somaAtual;
+    if (val > falta) {
+      fb.className = 'dep-feedback erro';
+      fb.innerText = `❌ Valor maior que o faltante (${fmt(falta)}).`;
+      return;
+    }
+
+    // Se não há quadros disponíveis, expande automaticamente
+    let semDisp = valores.every((_, i) => marcados.has(i));
+    if (semDisp) {
+      if (somaAtual < getObjetivo() - 0.005) {
+        expandirSeNecessario();
+      } else {
+        fb.className = 'dep-feedback erro';
+        fb.innerText = '🎉 Desafio concluído! Todos os quadros marcados.';
+        return;
+      }
+    }
+
+    // Quadrados disponíveis (não marcados), do menor para o maior
+    const disponiveis = valores
+      .map((v, i) => ({ v: valorReal(i), i }))
+      .filter(x => !marcados.has(x.i))
+      .sort((a, b) => a.v - b.v);
+
+    if (disponiveis.length === 0) {
+      fb.className = 'dep-feedback erro';
+      fb.innerText = '⚠️ Não foi possível expandir os quadros.';
+      return;
+    }
+
+    let restante = Math.round(val * 100) / 100;
+    let qtd = 0;
+
+    // Passo 1: marca quadrados cujo valor cabe EXATAMENTE no restante (sem ultrapassar)
+    for (const item of disponiveis) {
+      if (restante <= 0) break;
+      if (item.v <= restante) {
+        marcados.add(item.i);
+        restante = Math.round((restante - item.v) * 100) / 100;
+        qtd++;
+      }
+    }
+
+    // Passo 2: se ainda sobrou troco, pega o próximo quadro disponível,
+    // DIVIDE em dois: marca com o valor do troco + cria novo quadro desmarcado com o resto
+    if (restante > 0) {
+      const proximo = disponiveis.find(x => !marcados.has(x.i));
+      if (proximo) {
+        const valorOriginal = valorReal(proximo.i);
+        const troco = Math.round((valorOriginal - restante) * 100) / 100;
+        // Reduz o quadro existente para o valor do troco
+        ajustes[proximo.i] = restante;
+        marcados.add(proximo.i);
+        qtd++;
+        // Cria um novo quadro extra desmarcado com o valor restante (troco)
+        if (troco > 0) {
+          extras.push(troco);
+          valores = [...valoresBase, ...extras];
+        }
+      }
+    }
+
+    salvar();
+    renderGrid();
+    document.getElementById('inDeposito').value = '';
+
+    // Integração com Poupança — registra o depósito como entrada
+    registrarMovPoupanca('entrada', val, `Desafio — depósito rápido ${fmt(val)}`);
+
+    fb.className = 'dep-feedback';
+    fb.innerText = `✅ ${qtd} quadro(s) marcado(s) · ${fmt(val)} aplicado(s) com exatidão!`;
+  }
+
+  // ══════════════════════════════════════════════
+  // MÓDULO POUPANÇA
+  // ══════════════════════════════════════════════
+
+  function carregarPoupanca() {
+    movs = JSON.parse(localStorage.getItem(CHAVE_MOVS) || '[]');
+    // preenche data de hoje no campo de data
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('movData').value = hoje;
+    renderExtrato();
+  }
+
+  function selecionarTipo(tipo) {
+    tipoSelecionado = tipo;
+    document.getElementById('btnEntrada').className = 'tipo-btn' + (tipo === 'entrada' ? ' entrada-sel' : '');
+    document.getElementById('btnSaida').className   = 'tipo-btn' + (tipo === 'saida'   ? ' saida-sel'   : '');
+  }
+
+  function adicionarMov() {
+    const desc  = document.getElementById('movDesc').value.trim();
+    const valor = parseFloat(document.getElementById('movValor').value);
+    const data  = document.getElementById('movData').value;
+
+    if (!desc)         { alert('Digite uma descrição.'); return; }
+    if (isNaN(valor) || valor <= 0) { alert('Digite um valor válido.'); return; }
+    if (!data)         { alert('Selecione uma data.'); return; }
+
+    // Se for SAÍDA, desmarca quadros do desafio equivalentes ao valor
+    if (tipoSelecionado === 'saida') {
+      // Quadros marcados, do MAIOR para o MENOR (desmarca os maiores primeiro)
+      const marcadosList = [...marcados]
+        .map(i => ({ i, v: valorReal(i) }))
+        .sort((a, b) => b.v - a.v);
+
+      // Verifica se há saldo suficiente no desafio
+      let somaDesafio = 0;
+      marcados.forEach(i => somaDesafio += valorReal(i));
+      if (valor > somaDesafio) {
+        alert(`❌ Valor de retirada (${fmt(valor)}) maior que o acumulado no desafio (${fmt(somaDesafio)}).`);
+        return;
+      }
+
+      let restante = Math.round(valor * 100) / 100;
+      for (const item of marcadosList) {
+        if (restante <= 0) break;
+        if (item.v <= restante) {
+          // Desmarca o quadro inteiro
+          marcados.delete(item.i);
+          if (ajustes[item.i] !== undefined) delete ajustes[item.i];
+          restante = Math.round((restante - item.v) * 100) / 100;
+        } else {
+          // Desmarca o quadro e DIVIDE:
+          // - o quadro atual fica com (valorQuadro - restante) → continua marcado
+          // - cria novo quadro extra desmarcado com o valor da retirada (restante)
+          const valorQuadro = item.v;
+          const novoMarcado = Math.round((valorQuadro - restante) * 100) / 100;
+          const novoExtra   = Math.round(restante * 100) / 100;
+
+          // Desmarca o quadro original
+          marcados.delete(item.i);
+          if (ajustes[item.i] !== undefined) delete ajustes[item.i];
+
+          // Cria dois novos quadros extras:
+          // 1) desmarcado com o valor da retirada
+          // 2) marcado com o valor que sobra no quadro
+          const idxExtra1 = valoresBase.length + extras.length;
+          extras.push(novoExtra);   // desmarcado (valor retirado)
+          const idxExtra2 = valoresBase.length + extras.length;
+          extras.push(novoMarcado); // marcado (resto do quadro original)
+          valores = [...valoresBase, ...extras];
+          marcados.add(idxExtra2);  // marca o segundo
+
+          restante = 0;
+        }
+      }
+      salvar();
+      renderGrid();
+    }
+
+    movs.unshift({
+      id:    Date.now(),
+      tipo:  tipoSelecionado,
+      desc,
+      valor: Math.round(valor * 100) / 100,
+      data
+    });
+
+    localStorage.setItem(CHAVE_MOVS, JSON.stringify(movs));
+
+    // limpa campos
+    document.getElementById('movDesc').value  = '';
+    document.getElementById('movValor').value = '';
+
+    renderExtrato();
+  }
+
+  function excluirMov(id) {
+    movs = movs.filter(m => m.id !== id);
+    localStorage.setItem(CHAVE_MOVS, JSON.stringify(movs));
+    renderExtrato();
+  }
+
+  function limparExtrato() {
+    if (confirm('Deseja excluir todas as movimentações?')) {
+      movs = [];
+      localStorage.removeItem(CHAVE_MOVS);
+      renderExtrato();
+    }
+  }
+
+  function renderExtrato() {
+    const el = document.getElementById('extrato');
+    let totalE = 0, totalS = 0;
+
+    movs.forEach(m => {
+      if (m.tipo === 'entrada') totalE += m.valor;
+      else                      totalS += m.valor;
+    });
+
+    const saldo = totalE - totalS;
+
+    document.getElementById('pTotalEntradas').innerText = fmt(totalE);
+    document.getElementById('pTotalSaidas').innerText   = fmt(totalS);
+    document.getElementById('pSaldo').innerText         = fmt(saldo);
+
+    if (movs.length === 0) {
+      el.innerHTML = '<div class="extrato-vazio">Nenhuma movimentação registrada.</div>';
+      return;
+    }
+
+    el.innerHTML = movs.map(m => {
+      const icon  = m.tipo === 'entrada' ? '⬆️' : '⬇️';
+      const cls   = m.tipo === 'entrada' ? 'e' : 's';
+      const sinal = m.tipo === 'entrada' ? '+' : '-';
+      const dtFmt = m.data ? new Date(m.data + 'T12:00:00').toLocaleDateString('pt-BR') : '';
+      return `
+        <div class="mov-row">
+          <span class="mov-icon">${icon}</span>
+          <div class="mov-info">
+            <div class="mov-desc">${m.desc}</div>
+            <div class="mov-data">${dtFmt}</div>
+          </div>
+          <span class="mov-valor ${cls}">${sinal} ${fmt(m.valor)}</span>
+          <button class="mov-del" onclick="excluirMov(${m.id})">🗑</button>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Configurações de Conta ──
+  function salvarConta() {
+    const msg       = document.getElementById('cfgMsg');
+    const uAtual    = document.getElementById('cfgUsuarioAtual').value.trim();
+    const pAtual    = document.getElementById('cfgSenhaAtual').value;
+    const uNovo     = document.getElementById('cfgNovoUsuario').value.trim();
+    const pNova     = document.getElementById('cfgNovaSenha').value;
+    const pConfirma = document.getElementById('cfgConfirmaSenha').value;
+
+    // Valida usuário e senha atuais
+    if (!uAtual || !pAtual) {
+      msg.className = 'config-msg erro';
+      msg.innerText = '❌ Preencha o usuário e senha atuais.';
+      return;
+    }
+    if (!USUARIOS[uAtual] || USUARIOS[uAtual] !== pAtual) {
+      msg.className = 'config-msg erro';
+      msg.innerText = '❌ Usuário ou senha atual incorretos.';
+      return;
+    }
+    // Precisa mudar pelo menos um dos dois
+    if (!uNovo && !pNova) {
+      msg.className = 'config-msg erro';
+      msg.innerText = '❌ Informe o novo usuário ou a nova senha.';
+      return;
+    }
+    // Se informou nova senha, confirmar
+    if (pNova && pNova !== pConfirma) {
+      msg.className = 'config-msg erro';
+      msg.innerText = '❌ As senhas novas não coincidem.';
+      return;
+    }
+
+    const novoUsuario = uNovo  || uAtual;
+    const novaSenha   = pNova  || pAtual;
+
+    // Aplica a mudança
+    delete USUARIOS[uAtual];
+    USUARIOS[novoUsuario] = novaSenha;
+    localStorage.setItem(CHAVE_USERS, JSON.stringify(USUARIOS));
+
+    // Limpa os campos
+    ['cfgUsuarioAtual','cfgSenhaAtual','cfgNovoUsuario','cfgNovaSenha','cfgConfirmaSenha']
+      .forEach(id => document.getElementById(id).value = '');
+
+    msg.className = 'config-msg ok';
+    msg.innerText = `✅ Credenciais atualizadas! Novo usuário: "${novoUsuario}"`;
+
+    // Atualiza label do usuário logado se for o mesmo
+    document.getElementById('userLabel').innerText = '👤 ' + novoUsuario;
+  }
+
+  // ══ MODAL: ALTERAR OBJETIVO ══
+  // Modo atual do modal: 'trocar' (reset) ou 'expandir' (adiciona quadros)
+  let _modoModal = 'trocar';
+
+  function setModoObjetivo(modo) {
+    _modoModal = modo;
+    const btnT = document.getElementById('modoTrocar');
+    const btnE = document.getElementById('modoExpandir');
+    const desc = document.getElementById('modalDesc');
+    if (modo === 'trocar') {
+      btnT.style.background = 'var(--accent)'; btnT.style.color = 'var(--accent-dk)';
+      btnT.style.borderColor = 'var(--accent)';
+      btnE.style.background = 'transparent'; btnE.style.color = 'var(--muted)';
+      btnE.style.borderColor = 'var(--border)';
+      desc.innerText = 'Reinicia os quadros do zero com a nova meta.';
+    } else {
+      btnE.style.background = 'var(--accent)'; btnE.style.color = 'var(--accent-dk)';
+      btnE.style.borderColor = 'var(--accent)';
+      btnT.style.background = 'transparent'; btnT.style.color = 'var(--muted)';
+      btnT.style.borderColor = 'var(--border)';
+      desc.innerText = 'Mantém o progresso atual e adiciona quadros para cobrir o novo valor.';
+    }
+  }
+
+  function setModalVal(v) {
+    document.getElementById('modalValor').value = v;
+    document.getElementById('modalErro').innerText = '';
+  }
+
+  function abrirModalObjetivo() {
+    document.getElementById('modalValor').value = '';
+    document.getElementById('modalErro').innerText = '';
+    document.getElementById('modalValor').placeholder =
+      getObjetivo().toLocaleString('pt-BR', {minimumFractionDigits:2});
+    // sempre abre no modo trocar
+    setModoObjetivo('trocar');
+    document.getElementById('modalObjetivo').style.display = 'flex';
+    setTimeout(() => document.getElementById('modalValor').focus(), 50);
+  }
+
+  function fecharModalObjetivo() {
+    document.getElementById('modalObjetivo').style.display = 'none';
+  }
+
+  function confirmarNovoObjetivo() {
+    const raw     = document.getElementById('modalValor').value.trim().replace(',', '.');
+    const novoObj = parseFloat(raw);
+    const erro    = document.getElementById('modalErro');
+
+    if (isNaN(novoObj) || novoObj < 1) {
+      erro.innerText = 'Digite um valor válido (mínimo R$ 1,00).';
+      return;
+    }
+
+    if (_modoModal === 'trocar') {
+      // ── TROCAR: apaga tudo e reconstrói do zero ──
+      const objAnt = getObjetivo();
+      // Limpa localStorage do objetivo anterior
+      localStorage.removeItem('desafio_v4_marcados_' + objAnt);
+      localStorage.removeItem('desafio_v4_ajustes_'  + objAnt);
+      localStorage.removeItem('desafio_v4_extras_'   + objAnt);
+      localStorage.removeItem('desafio_v4_objetivo_' + objAnt);
+      // Atualiza chaves de storage para o novo objetivo
+      CHAVE_M = 'desafio_v4_marcados_' + novoObj;
+      CHAVE_A = 'desafio_v4_ajustes_'  + novoObj;
+      CHAVE_E = 'desafio_v4_extras_'   + novoObj;
+      // Reseta estado em memória
+      extras   = [];
+      marcados = new Set();
+      ajustes  = {};
+      // Reconstrói os quadros e define o novo objetivo
+      localStorage.setItem(CHAVE_OBJ_INICIAL, novoObj);
+      gerarQuadros(novoObj);
+      valores = [...valoresBase];
+      salvar();
+      fecharModalObjetivo();
+      renderGrid();
+
+    } else {
+      // ── EXPANDIR: mantém progresso, só adiciona quadros ──
+      const somaAtual = Math.round([...marcados].reduce((s, i) => s + valorReal(i), 0) * 100) / 100;
+      if (novoObj <= somaAtual) {
+        erro.innerText = 'O novo objetivo deve ser maior que o acumulado (' +
+          somaAtual.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}) + ').';
+        return;
+      }
+      const faltaNovo = Math.round((novoObj - somaAtual) * 100) / 100;
+      const grupos = [[10,20],[20,20],[30,30],[50,30],[100,30]];
+      const escala = faltaNovo / 6000;
+      let novos = [];
+      grupos.forEach(([val, qtdBase]) => {
+        const qtd = Math.max(1, Math.round(qtdBase * escala));
+        for (let k = 0; k < qtd; k++) novos.push(val);
+      });
+      let somaExtra = novos.reduce((s,v) => s+v, 0);
+      let diff = Math.round((somaExtra - faltaNovo) * 100) / 100;
+      if (diff > 0) {
+        novos[novos.length-1] = Math.round((novos[novos.length-1] - diff) * 100) / 100;
+        if (novos[novos.length-1] <= 0) novos.pop();
+      } else if (diff < 0) {
+        novos.push(Math.round(-diff * 100) / 100);
+      }
+      novos.forEach(v => extras.push(v));
+      valores = [...valoresBase, ...extras];
+      localStorage.setItem('desafio_v4_objetivo_' + getObjetivo(), novoObj);
+      window._objetivoAtual = novoObj;
+      salvar();
+      fecharModalObjetivo();
+      renderGrid();
+    }
+  }
+
+  // Objetivo em runtime (pode ter sido atualizado pelo modal)
+  function getObjetivo() {
+    return window._objetivoAtual || parseFloat(localStorage.getItem(CHAVE_OBJ_INICIAL)) || 6000;
+  }
+
+  // ── Troca de abas ──
+  function mudarAba(aba) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab' + aba.charAt(0).toUpperCase() + aba.slice(1)).classList.add('active');
+    event.target.classList.add('active');
+    if (aba === 'poupanca') carregarPoupanca();
+    if (aba === 'config') document.getElementById('cfgMsg').innerText = '';
+  }
+
+  // ── Temas ──
+  function trocarTema(tema) {
+    document.body.className = tema && tema !== 'escuro' ? 'tema-' + tema : '';
+    localStorage.setItem('tema_desafio', tema || 'escuro');
+    const sel = document.getElementById('temaSelect');
+    if (sel) sel.value = tema || 'escuro';
+  }
+
+  // Aplica o tema no body imediatamente (antes do login, sem tocar no select)
+  (function() {
+    const t = localStorage.getItem('tema_desafio') || 'escuro';
+    document.body.className = t && t !== 'escuro' ? 'tema-' + t : '';
+  })();
+</script>
+</body>
+</html>
