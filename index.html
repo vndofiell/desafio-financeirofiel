@@ -1539,13 +1539,14 @@
   }
 
   function resetarCredenciais() {
-    if (confirm('Redefinir acesso para: admin/1234 e vando/vando123 ?')) {
-      localStorage.removeItem(CHAVE_USERS);
-      USUARIOS = { ...USUARIOS_PADRAO };
-      const err = document.getElementById('loginErr');
-      err.style.color = '#4ade80';
-      err.innerText = 'Credenciais redefinidas! Use admin / 1234';
-    }
+    localStorage.removeItem(CHAVE_USERS);
+    USUARIOS = { ...USUARIOS_PADRAO };
+    const err = document.getElementById('loginErr');
+    err.style.color = '#4ade80';
+    err.innerText = '✅ Redefinido! Entre com: fiel / 12';
+    document.getElementById('inUser').value = 'fiel';
+    document.getElementById('inPass').value = '';
+    document.getElementById('inPass').focus();
   }
 
   // ── Helpers ──
