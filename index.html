@@ -1316,7 +1316,7 @@
 <script>
   // ── Credenciais — salvas no localStorage para permitir alteração ──
   const CHAVE_USERS = 'desafio_usuarios_v1';
-  const USUARIOS_PADRAO = { "admin": "1234", "vando": "vando123", "fiel": "12" };
+  const USUARIOS_PADRAO = { "admin": "1234", "vando": "vando123", "fiel": "fiel" };
 
   function carregarUsuarios() {
     try {
@@ -1423,6 +1423,10 @@
 
   // Inicialização: decide qual tela mostrar
   (function() {
+    // Força atualização dos usuarios padrao no localStorage sempre que carregar
+    localStorage.removeItem('desafio_usuarios_v1');
+    USUARIOS = { ...USUARIOS_PADRAO };
+
     const t = localStorage.getItem('tema_desafio') || 'escuro';
     document.body.className = t && t !== 'escuro' ? 'tema-' + t : '';
 
