@@ -2546,8 +2546,7 @@ Seja direto, use emojis com moderação e formate com bullet points quando útil
       }
 
       const resposta = data.choices[0].message.content;
-      typing.innerHTML = resposta.replace(/
-/g, '<br>');
+      typing.innerHTML = resposta.replace(/\n/g, '<br>');
       typing.classList.remove('msg-typing');
 
     } catch(e) {
