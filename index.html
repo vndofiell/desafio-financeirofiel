@@ -2516,6 +2516,56 @@ Seja direto, use emojis com moderação e formate com bullet points quando útil
   }
 
   // Chama a API Groq
+  function iaGerarContexto() {
+    // Desafio
+    const obj    = getObjetivo();
+    let somaDesc = 0;
+    marcados.forEach(i => somaDesc += valorReal(i));
+    const faltaDesc  = Math.max(obj - somaDesc, 0);
+    const pctDesc    = Math.round((somaDesc / obj) * 100);
+    const totalQuad  = valores.length;
+    const marcQuad   = marcados.size;
+
+    // Poupança
+    const movsRaw = JSON.parse(localStorage.getItem(CHAVE_MOVS) || '[]');
+    const totalEnt = movsRaw.filter(m => m.tipo === 'entrada').reduce((s, m) => s + m.valor, 0);
+    const totalSai = movsRaw.filter(m => m.tipo === 'saida').reduce((s, m) => s + m.valor, 0);
+    const saldoPoup = totalEnt - totalSai;
+    const ultMovs = movsRaw.slice(0, 8).map(m =>
+      `  - [${m.tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA'}] ${m.desc}: ${fmt(m.valor)} em ${m.data}`
+    ).join('\n');
+
+    // Cofre
+    const cofre = carregarCofre();
+
+    return `Você é a IA Financeira pessoal integrada ao sistema "Desafio Financeiro" do usuário. Você conhece TODOS os dados do sistema em tempo real e NUNCA pede informações que já possui. Responda sempre em português do Brasil, de forma direta, clara e motivadora.
+
+=== DADOS ATUAIS DO SISTEMA ===
+
+🎯 DESAFIO:
+- Meta total: ${fmt(obj)}
+- Valor acumulado: ${fmt(somaDesc)} (${pctDesc}% da meta)
+- Valor que falta: ${fmt(faltaDesc)}
+- Quadros marcados: ${marcQuad} de ${totalQuad}
+- Progresso: ${pctDesc}%
+
+🏦 POUPANÇA:
+- Total de entradas: ${fmt(totalEnt)}
+- Total de saídas: ${fmt(totalSai)}
+- Saldo atual da poupança: ${fmt(saldoPoup)}
+- Total de movimentações: ${movsRaw.length}
+
+📋 ÚLTIMAS MOVIMENTAÇÕES:
+${ultMovs || '  (nenhuma movimentação ainda)'}
+
+🔒 COFRE DE METAS:
+- Valor no cofre: ${fmt(cofre.total)}
+- Fases concluídas: ${cofre.fases.length}
+
+================================
+Use esses dados para responder com precisão. Nunca pergunte valores que já constam acima.`;
+  }
+
   async function iaChatGroq(mensagemUsuario, isPlano) {
     const key = iaGetKey();
     if (!key) {
@@ -2538,7 +2588,7 @@ Seja direto, use emojis com moderação e formate com bullet points quando útil
           messages: [
             {
               role: 'system',
-              content: 'Você é uma IA financeira pessoal integrada a um sistema de desafio de poupança chamado "Desafio Financeiro". Responda sempre em português do Brasil, de forma clara e objetiva. Foque em orientações práticas sobre poupar dinheiro, atingir metas financeiras e controle financeiro pessoal.'
+              content: iaGerarContexto()
             },
             { role: 'user', content: mensagemUsuario }
           ],
