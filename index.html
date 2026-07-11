@@ -874,7 +874,8 @@
       <div class="deposito-rapido">
         <div class="label">⚡ Depósito Rápido</div>
         <div class="input-row">
-          <input type="number" id="inDeposito" placeholder="R$ valor" min="1"
+          <input type="text" id="inDeposito" placeholder="0,00" inputmode="numeric"
+                 oninput="mascaraDeposito(this)"
                  onkeydown="if(event.key==='Enter') depositar()" />
           <button class="btn-dep" onclick="depositar()">OK</button>
         </div>
@@ -1497,11 +1498,30 @@
     renderGrid();
   }
 
+  // ── Máscara monetária automática ──
+  function mascaraDeposito(el) {
+    // Remove tudo que não for dígito
+    let digits = el.value.replace(/\D/g, '');
+    // Limita a 10 dígitos (max R$ 99.999.999,99)
+    if (digits.length > 10) digits = digits.slice(0, 10);
+    // Converte para centavos e formata
+    const cents = parseInt(digits || '0', 10);
+    const reais = (cents / 100).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    el.value = reais === '0,00' ? '' : reais;
+  }
+
+  function valorDeposito() {
+    const raw = document.getElementById('inDeposito').value.replace(/\./g, '').replace(',', '.');
+    return parseFloat(raw) || 0;
+  }
+
   // ── Depósito Rápido ──
   function depositar() {
     const fb  = document.getElementById('depFeedback');
-    const raw = document.getElementById('inDeposito').value.trim().replace(',', '.');
-    const val = parseFloat(raw);
+    const val = valorDeposito();
 
     if (isNaN(val) || val <= 0) {
       fb.className = 'dep-feedback erro';
