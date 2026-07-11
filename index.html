@@ -731,13 +731,59 @@
   .ia-chat-box::-webkit-scrollbar { width: 4px; }
   .ia-chat-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
   .msg-ia, .msg-user {
-    max-width: 80%; padding: 10px 14px;
-    border-radius: 14px; font-size: 0.88rem; line-height: 1.6;
+    max-width: 88%; padding: 14px 18px;
+    border-radius: 14px; font-size: 0.92rem; line-height: 1.7;
     white-space: pre-wrap; word-break: break-word;
   }
   .msg-ia   { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; color: var(--text); border-radius: 4px 14px 14px 14px; }
   .msg-user { background: #7c3aed; color: #fff; align-self: flex-end; border-radius: 14px 4px 14px 14px; }
   .msg-typing { opacity: 0.5; font-style: italic; }
+
+  /* ── Plano IA formatado ── */
+  .ia-plano { display: flex; flex-direction: column; gap: 10px; white-space: normal; }
+  .ia-plano-secao {
+    border-radius: 10px; padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .ia-plano-secao.situacao { background: linear-gradient(135deg,#1e3a5f,#1e293b); border-color:#2563eb44; }
+  .ia-plano-secao.depositos { background: linear-gradient(135deg,#14532d,#1e293b); border-color:#22c55e44; }
+  .ia-plano-secao.cronograma { background: linear-gradient(135deg,#3b1f6b,#1e293b); border-color:#7c3aed44; }
+  .ia-plano-secao.acoes { background: linear-gradient(135deg,#7c2d12,#1e293b); border-color:#f9731644; }
+  .ia-plano-titulo {
+    font-size: 1rem; font-weight: 800; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px; letter-spacing: 0.3px;
+  }
+  .ia-plano-secao.situacao  .ia-plano-titulo { color: #60a5fa; }
+  .ia-plano-secao.depositos .ia-plano-titulo { color: #4ade80; }
+  .ia-plano-secao.cronograma .ia-plano-titulo { color: #a78bfa; }
+  .ia-plano-secao.acoes .ia-plano-titulo { color: #fb923c; }
+  .ia-plano-linha {
+    font-size: 0.88rem; color: var(--text); padding: 3px 0;
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .ia-plano-linha strong { font-weight: 700; font-size: 1rem; }
+  .ia-plano-linha.destaque strong { font-size: 1.15rem; color: #4ade80; }
+  .ia-semana-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr));
+    gap: 5px; margin-top: 4px;
+  }
+  .ia-semana-item {
+    background: rgba(255,255,255,0.05); border-radius: 7px;
+    padding: 5px 8px; font-size: 0.78rem; color: var(--muted2);
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .ia-semana-item span { display: block; font-weight: 700; color: #a78bfa; font-size: 0.85rem; }
+  .ia-acao-item {
+    display: flex; gap: 8px; align-items: flex-start;
+    padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.88rem;
+  }
+  .ia-acao-item:last-child { border-bottom: none; }
+  .ia-acao-num {
+    background: #f97316; color: #fff; font-weight: 800; font-size: 0.75rem;
+    border-radius: 50%; width: 20px; height: 20px; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+  }
   .ia-input-row {
     display: flex; gap: 8px; padding: 12px 16px;
     border-top: 1px solid var(--border);
@@ -2497,34 +2543,89 @@
     const porMes    = falta > 0 ? Math.ceil((falta / dias) * 30 * 100) / 100 : 0;
     const semanas   = Math.ceil(dias / 7);
 
-    // Monta cronograma semana a semana já calculado em JS — IA só formata
-    let cronograma = '';
+    // Monta cronograma em HTML — valores calculados pelo JS, não pela IA
+    let semanasHTML = '';
     for (let s = 1; s <= semanas; s++) {
-      const metaSemana = s < semanas ? fmt(porSemana) : fmt(Math.round((falta - porSemana * (semanas - 1)) * 100) / 100);
-      cronograma += `  Semana ${s}: depositar ${metaSemana}\n`;
+      const val = s < semanas ? fmt(porSemana) : fmt(Math.round((falta - porSemana * (semanas - 1)) * 100) / 100);
+      semanasHTML += `<div class="ia-semana-item">Semana ${s}<span>${val}</span></div>`;
     }
 
-    const prompt = `Você é um assistente financeiro. Apresente o plano abaixo SEM alterar nenhum número. Apenas formate e adicione 3 ações práticas no final.
+    // Renderiza o plano visual imediatamente (sem IA)
+    const box = document.getElementById('iaChatBox');
+    const planoDiv = document.createElement('div');
+    planoDiv.className = 'msg-ia';
+    planoDiv.style.maxWidth = '96%';
+    planoDiv.innerHTML = `<div class="ia-plano">
+      <div class="ia-plano-secao situacao">
+        <div class="ia-plano-titulo">📊 SITUAÇÃO ATUAL</div>
+        <div class="ia-plano-linha destaque">🎯 Meta: <strong>${fmt(obj)}</strong></div>
+        <div class="ia-plano-linha">✅ Acumulado: <strong>${fmt(soma)} (${pct}%)</strong></div>
+        <div class="ia-plano-linha">⏳ Falta: <strong>${fmt(falta)}</strong></div>
+        <div class="ia-plano-linha">📅 Depositando <strong>${fmt(porSemana)}/semana</strong> → meta em <strong>${semanas} semanas (${dias} dias)</strong></div>
+      </div>
+      <div class="ia-plano-secao depositos">
+        <div class="ia-plano-titulo">💰 PLANO DE DEPÓSITOS</div>
+        <div class="ia-plano-linha">Por dia: <strong>${fmt(porDia)}</strong></div>
+        <div class="ia-plano-linha">Por semana: <strong>${fmt(porSemana)}</strong></div>
+        <div class="ia-plano-linha">Por mês: <strong>${fmt(porMes)}</strong></div>
+      </div>
+      <div class="ia-plano-secao cronograma">
+        <div class="ia-plano-titulo">📅 CRONOGRAMA — ${semanas} SEMANAS</div>
+        <div class="ia-semana-grid">${semanasHTML}</div>
+      </div>
+      <div class="ia-plano-secao acoes" id="ia-acoes-bloco">
+        <div class="ia-plano-titulo">⚡ AÇÕES PRÁTICAS</div>
+        <div id="ia-acoes-conteudo" style="opacity:0.5;font-style:italic;font-size:0.85rem;">Gerando dicas personalizadas...</div>
+      </div>
+    </div>`;
+    box.appendChild(planoDiv);
+    box.scrollTop = box.scrollHeight;
 
-📊 SITUAÇÃO ATUAL
-- Acumulado: ${fmt(soma)} de ${fmt(obj)} (${pct}%)
-- Falta: ${fmt(falta)}
-- Depositando ${fmt(porSemana)} por semana, você alcança o objetivo em ${semanas} semanas (${dias} dias)
+    // Pede só as 3 ações práticas para a IA
+    const promptAcoes = `Com base nesses dados financeiros:
+- Meta: ${fmt(obj)}, acumulado: ${fmt(soma)} (${pct}%), falta: ${fmt(falta)}
+- Prazo: ${dias} dias, depósito semanal: ${fmt(porSemana)}
 
-💰 PLANO DE DEPÓSITOS
-- Por dia: ${fmt(porDia)}
-- Por semana: ${fmt(porSemana)}
-- Por mês: ${fmt(porMes)}
+Escreva EXATAMENTE 3 ações práticas e específicas para ajudar a atingir essa meta mais rápido.
+Formato obrigatório (uma por linha, sem introdução):
+1. [ação]
+2. [ação]
+3. [ação]
 
-📅 CRONOGRAMA SEMANAL
-${cronograma}
-⚡ 3 AÇÕES PRÁTICAS
-(escreva aqui 3 ações específicas e práticas para este caso)
+Máximo 60 palavras no total. Sem enrolação.`;
 
-ATENÇÃO: NÃO recalcule nada. NÃO altere os valores acima. NÃO mencione o cofre. Máximo 200 palavras.`;
-
-    iaAddMsg('✨ Gerando plano...', 'ia');
-    await iaChatGroq(prompt, true);
+    const key = iaGetKey();
+    if (!key) {
+      document.getElementById('ia-acoes-conteudo').innerHTML = '⚠️ Adicione sua chave API Groq para ver as dicas personalizadas.';
+      document.getElementById('ia-acoes-conteudo').style.opacity = '1';
+      document.getElementById('ia-acoes-conteudo').style.fontStyle = 'normal';
+      return;
+    }
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: promptAcoes }],
+          temperature: 0.7, max_tokens: 200
+        })
+      });
+      const data = await res.json();
+      const acoes = (data.choices?.[0]?.message?.content || '').trim().split('\n').filter(l => l.trim());
+      let acoesHTML = '';
+      acoes.forEach((a, i) => {
+        const txt = a.replace(/^\d+\.\s*/, '');
+        acoesHTML += `<div class="ia-acao-item"><div class="ia-acao-num">${i+1}</div><div>${txt}</div></div>`;
+      });
+      const el = document.getElementById('ia-acoes-conteudo');
+      el.innerHTML = acoesHTML;
+      el.style.opacity = '1';
+      el.style.fontStyle = 'normal';
+    } catch(e) {
+      document.getElementById('ia-acoes-conteudo').innerText = '❌ Erro ao gerar dicas.';
+    }
+    box.scrollTop = box.scrollHeight;
   }
 
   // Chama a API Groq
