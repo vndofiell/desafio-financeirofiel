@@ -2579,7 +2579,8 @@
       </div>
     </div>`;
     box.appendChild(planoDiv);
-    box.scrollTop = box.scrollHeight;
+    // Rola para mostrar o TOPO do plano recém gerado
+    setTimeout(() => planoDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
 
     // Pede só as 3 ações práticas para a IA
     const promptAcoes = `Com base nesses dados financeiros:
@@ -2625,7 +2626,8 @@ Máximo 60 palavras no total. Sem enrolação.`;
     } catch(e) {
       document.getElementById('ia-acoes-conteudo').innerText = '❌ Erro ao gerar dicas.';
     }
-    box.scrollTop = box.scrollHeight;
+    // Após as ações carregarem, rola para mostrar o plano completo do topo
+    setTimeout(() => planoDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
   }
 
   // Chama a API Groq
