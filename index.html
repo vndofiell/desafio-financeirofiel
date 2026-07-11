@@ -1796,13 +1796,59 @@
   }
 
   function excluirMov(id) {
+    // Encontra a movimentação antes de remover
+    const mov = movs.find(m => m.id === id);
     movs = movs.filter(m => m.id !== id);
     localStorage.setItem(CHAVE_MOVS, JSON.stringify(movs));
+
+    // Sincroniza com o Desafio — ignora movs geradas automaticamente pelo próprio Desafio
+    if (mov && !mov.desc.startsWith('Desafio —')) {
+      if (mov.tipo === 'entrada') {
+        // Entrada excluída → desmarca quadros equivalentes no desafio
+        const marcadosList = [...marcados]
+          .map(i => ({ i, v: valorReal(i) }))
+          .sort((a, b) => b.v - a.v);
+        let somaDesafio = 0;
+        marcados.forEach(i => somaDesafio += valorReal(i));
+        const aplicar = Math.min(mov.valor, somaDesafio);
+        if (aplicar > 0.005) {
+          let restante = Math.round(aplicar * 100) / 100;
+          for (const item of marcadosList) {
+            if (restante <= 0) break;
+            if (item.v <= restante) {
+              marcados.delete(item.i);
+              if (ajustes[item.i] !== undefined) delete ajustes[item.i];
+              restante = Math.round((restante - item.v) * 100) / 100;
+            } else {
+              const novoMarcado = Math.round((item.v - restante) * 100) / 100;
+              const novoExtra   = Math.round(restante * 100) / 100;
+              marcados.delete(item.i);
+              if (ajustes[item.i] !== undefined) delete ajustes[item.i];
+              const idx1 = valoresBase.length + extras.length;
+              extras.push(novoExtra);
+              const idx2 = valoresBase.length + extras.length;
+              extras.push(novoMarcado);
+              valores = [...valoresBase, ...extras];
+              marcados.add(idx2);
+              restante = 0;
+            }
+          }
+          salvar();
+          renderGrid();
+        }
+      } else if (mov.tipo === 'saida') {
+        // Saída excluída → marca quadros de volta no desafio
+        marcarQuadrosPorValor(mov.valor);
+      }
+    }
+
     renderExtrato();
   }
 
   function limparExtrato() {
-    if (confirm('Deseja excluir todas as movimentações?')) {
+    if (confirm('Deseja excluir todas as movimentações?
+
+Atenção: isso NÃO desfará os quadros marcados/desmarcados no Desafio.')) {
       movs = [];
       localStorage.removeItem(CHAVE_MOVS);
       renderExtrato();
