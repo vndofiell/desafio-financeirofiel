@@ -831,7 +831,15 @@
         <div class="value" id="cDepositos">—</div>
       </div>
       <div class="cofre-card">
-        <div class="label" style="color:#c084fc;">🏦 Cofre de Metas</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="label" style="color:#c084fc;">🏦 Cofre de Metas</div>
+          <button onclick="abrirModalCofre()" title="Editar cofre" style="
+            background:none;border:none;cursor:pointer;
+            color:#9f6fc4;font-size:0.9rem;padding:2px 4px;
+            border-radius:4px;transition:color 0.2s;line-height:1;"
+            onmouseover="this.style.color='#e879f9'"
+            onmouseout="this.style.color='#9f6fc4'">✏️</button>
+        </div>
         <div class="value" id="cCofre" style="color:#a855f7;">R$ 0,00</div>
         <div style="font-size:0.7rem;color:#9f6fc4;margin-top:4px;" id="cCofreFases">0 fase(s) concluída(s)</div>
       </div>
@@ -1902,7 +1910,141 @@
     renderGrid();
     atualizarCardCofre();
   }
+  // ══════════════════════════════════════════════
+  // MODAL: EDITAR / RESETAR COFRE DE METAS
+  // ══════════════════════════════════════════════
+
+  function abrirModalCofre() {
+    const cofre = carregarCofre();
+    // Preenche o campo de edição com o total atual
+    document.getElementById('cofreEditValor').value = cofre.total;
+    document.getElementById('cofreEditErro').innerText = '';
+    // Renderiza lista de fases
+    const lista = document.getElementById('cofreFasesList');
+    if (cofre.fases.length === 0) {
+      lista.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:10px 0;">Nenhuma fase concluída ainda.</div>';
+    } else {
+      lista.innerHTML = cofre.fases.map(f => `
+        <div style="display:flex;align-items:center;justify-content:space-between;
+          padding:8px 10px;background:var(--surface2);border:1px solid var(--border);
+          border-radius:8px;margin-bottom:6px;">
+          <div>
+            <span style="font-size:0.8rem;font-weight:700;color:#a855f7;">Fase ${f.fase}</span>
+            <span style="font-size:0.75rem;color:var(--muted);margin-left:8px;">${f.data || ''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:0.9rem;font-weight:700;color:#4ade80;">${fmt(f.meta)}</span>
+            <button onclick="excluirFaseCofre(${f.fase})" title="Remover fase" style="
+              background:none;border:none;cursor:pointer;color:var(--muted);
+              font-size:0.85rem;padding:2px 4px;border-radius:4px;transition:color 0.2s;"
+              onmouseover="this.style.color='#f87171'"
+              onmouseout="this.style.color='var(--muted)'">🗑</button>
+          </div>
+        </div>`).join('');
+    }
+    document.getElementById('modalCofreEditar').style.display = 'flex';
+  }
+
+  function fecharModalCofre() {
+    document.getElementById('modalCofreEditar').style.display = 'none';
+  }
+
+  function salvarEdicaoCofre() {
+    const raw = document.getElementById('cofreEditValor').value.trim().replace(',','.');
+    const novoTotal = parseFloat(raw);
+    const erroEl = document.getElementById('cofreEditErro');
+    if (isNaN(novoTotal) || novoTotal < 0) {
+      erroEl.innerText = 'Digite um valor válido (mínimo R$ 0,00).';
+      return;
+    }
+    const cofre = carregarCofre();
+    cofre.total = Math.round(novoTotal * 100) / 100;
+    salvarCofre(cofre);
+    atualizarCardCofre();
+    fecharModalCofre();
+  }
+
+  function excluirFaseCofre(numFase) {
+    const cofre = carregarCofre();
+    const fase  = cofre.fases.find(f => f.fase === numFase);
+    if (!fase) return;
+    cofre.fases  = cofre.fases.filter(f => f.fase !== numFase);
+    cofre.total  = Math.max(0, Math.round((cofre.total - fase.meta) * 100) / 100);
+    salvarCofre(cofre);
+    atualizarCardCofre();
+    abrirModalCofre(); // re-abre para refletir mudança
+  }
+
+  function resetarCofre() {
+    if (confirm('Deseja zerar o Cofre de Metas? Todo o histórico de fases será apagado.')) {
+      salvarCofre({ total: 0, fases: [] });
+      atualizarCardCofre();
+      fecharModalCofre();
+    }
+  }
 </script>
+
+<!-- ══ MODAL: EDITAR COFRE DE METAS ══ -->
+<div id="modalCofreEditar" style="
+  display:none; position:fixed; inset:0; z-index:1001;
+  background:rgba(0,0,0,0.85);
+  align-items:center; justify-content:center;">
+  <div style="
+    background:var(--surface); border:2px solid #a855f7;
+    border-radius:24px; padding:36px 40px; width:480px;
+    max-height:85vh; overflow-y:auto; position:relative;">
+
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:2rem;margin-bottom:6px;">🏦</div>
+      <h2 style="color:#a855f7;font-size:1.2rem;">Editar Cofre de Metas</h2>
+    </div>
+
+    <!-- Editar total -->
+    <div style="font-size:0.75rem;color:#c084fc;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
+      Valor total no cofre
+    </div>
+    <div style="display:flex;align-items:center;background:var(--surface2);border:2px solid var(--border);
+      border-radius:10px;padding:4px 4px 4px 14px;margin-bottom:4px;transition:border-color .2s" id="cofreEditWrap">
+      <span style="font-size:1rem;font-weight:700;color:#a855f7;margin-right:8px;white-space:nowrap">R$</span>
+      <input type="number" id="cofreEditValor" placeholder="0,00" min="0" step="0.01"
+             onkeydown="if(event.key==='Enter') salvarEdicaoCofre()"
+             onfocus="document.getElementById('cofreEditWrap').style.borderColor='#a855f7'"
+             onblur="document.getElementById('cofreEditWrap').style.borderColor='var(--border)'"
+             style="flex:1;background:none;border:none;outline:none;font-size:1.2rem;font-weight:700;color:var(--text);padding:10px 0;" />
+    </div>
+    <div id="cofreEditErro" style="color:#f87171;font-size:0.8rem;min-height:16px;margin-bottom:14px;"></div>
+
+    <!-- Lista de fases -->
+    <div style="font-size:0.75rem;color:#c084fc;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">
+      Histórico de fases
+    </div>
+    <div id="cofreFasesList" style="margin-bottom:20px;max-height:200px;overflow-y:auto;"></div>
+
+    <!-- Botões -->
+    <div style="display:flex;gap:8px;flex-direction:column;">
+      <div style="display:flex;gap:8px;">
+        <button onclick="fecharModalCofre()" style="
+          flex:1;padding:11px;background:var(--border);border:none;
+          border-radius:8px;color:var(--text);font-weight:600;cursor:pointer;font-size:0.88rem;">
+          Cancelar
+        </button>
+        <button onclick="salvarEdicaoCofre()" style="
+          flex:1;padding:11px;background:#a855f7;border:none;
+          border-radius:8px;color:#fff;font-weight:700;cursor:pointer;font-size:0.88rem;">
+          💾 Salvar
+        </button>
+      </div>
+      <button onclick="resetarCofre()" style="
+        width:100%;padding:10px;background:none;border:1px solid #ef4444;
+        border-radius:8px;color:#f87171;font-weight:600;cursor:pointer;font-size:0.85rem;
+        transition:background 0.2s;"
+        onmouseover="this.style.background='#450a0a'"
+        onmouseout="this.style.background='none'">
+        🗑️ Zerar cofre (apagar tudo)
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ MODAL: FASE CONCLUÍDA ══ -->
 <div id="modalFaseConcluida" style="
