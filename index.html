@@ -2492,78 +2492,70 @@
     const { obj, soma, falta } = iaAtualizarCards();
     const dias = parseInt(document.getElementById('ia_dias').value) || 30;
     const pct  = Math.round((soma / obj) * 100);
-    const porDia = falta > 0 ? Math.ceil((falta / dias) * 100) / 100 : 0;
+    const porDia    = falta > 0 ? Math.ceil((falta / dias) * 100) / 100 : 0;
+    const porSemana = falta > 0 ? Math.ceil((falta / dias) * 7 * 100) / 100 : 0;
+    const porMes    = falta > 0 ? Math.ceil((falta / dias) * 30 * 100) / 100 : 0;
+    const semanas   = Math.ceil(dias / 7);
 
-    const prompt = `Você é um consultor financeiro pessoal brasileiro, especialista em metas de poupança. Fale em português do Brasil, de forma clara, motivadora e objetiva.
+    const prompt = `Gere um plano financeiro DIRETO E OBJETIVO. Sem enrolação. Siga EXATAMENTE esta estrutura:
 
-Dados do usuário:
-- Meta total: ${fmt(obj)}
-- Valor já acumulado: ${fmt(soma)} (${pct}% da meta)
-- Valor que ainda falta: ${fmt(falta)}
-- Prazo desejado: ${dias} dias
-- Valor necessário por dia (modo conservador): ${fmt(porDia)}
+📊 SITUAÇÃO ATUAL
+- Acumulado: ${fmt(soma)} de ${fmt(obj)} (${pct}%)
+- Falta: ${fmt(falta)}
+- Prazo: ${dias} dias (${semanas} semanas)
 
-Com base nesses dados, faça:
-1. Uma análise rápida da situação atual
-2. Um plano semanal conservador e realista para atingir a meta
-3. 3 dicas práticas e específicas para juntar dinheiro mais rápido
-4. Uma mensagem motivacional personalizada
+💰 PLANO DE DEPÓSITOS (use os valores exatos abaixo, não invente outros)
+- Por dia: ${fmt(porDia)}
+- Por semana: ${fmt(porSemana)}
+- Por mês: ${fmt(porMes)}
 
-Seja direto, use emojis com moderação e formate com bullet points quando útil.`;
+📅 CRONOGRAMA SEMANAL (liste as ${semanas} semanas com meta de cada uma)
 
-    iaAddMsg(`✨ Gerando seu plano personalizado...`, 'ia');
+⚡ 3 AÇÕES PRÁTICAS (seja específico, sem genérico)
+
+REGRAS: Não explique o que é o cofre. Não sugira "usar o cofre" sem motivo. Não use frases motivacionais longas. Máximo 250 palavras no total.`;
+
+    iaAddMsg('✨ Gerando plano...', 'ia');
     await iaChatGroq(prompt, true);
   }
 
   // Chama a API Groq
   function iaGerarContexto() {
-    // Desafio
     const obj    = getObjetivo();
-    let somaDesc = 0;
-    marcados.forEach(i => somaDesc += valorReal(i));
-    const faltaDesc  = Math.max(obj - somaDesc, 0);
-    const pctDesc    = Math.round((somaDesc / obj) * 100);
-    const totalQuad  = valores.length;
-    const marcQuad   = marcados.size;
+    let soma = 0;
+    marcados.forEach(i => soma += valorReal(i));
+    const falta  = Math.max(obj - soma, 0);
+    const pct    = Math.round((soma / obj) * 100);
 
-    // Poupança
-    const movsRaw = JSON.parse(localStorage.getItem(CHAVE_MOVS) || '[]');
+    const movsRaw  = JSON.parse(localStorage.getItem(CHAVE_MOVS) || '[]');
     const totalEnt = movsRaw.filter(m => m.tipo === 'entrada').reduce((s, m) => s + m.valor, 0);
     const totalSai = movsRaw.filter(m => m.tipo === 'saida').reduce((s, m) => s + m.valor, 0);
-    const saldoPoup = totalEnt - totalSai;
-    const ultMovs = movsRaw.slice(0, 8).map(m =>
-      `  - [${m.tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA'}] ${m.desc}: ${fmt(m.valor)} em ${m.data}`
+    const ultMovs  = movsRaw.slice(0, 10).map(m =>
+      `  ${m.tipo === 'entrada' ? '+' : '-'} ${m.desc}: ${fmt(m.valor)} (${m.data})`
     ).join('\n');
 
-    // Cofre
     const cofre = carregarCofre();
 
-    return `Você é a IA Financeira pessoal integrada ao sistema "Desafio Financeiro" do usuário. Você conhece TODOS os dados do sistema em tempo real e NUNCA pede informações que já possui. Responda sempre em português do Brasil, de forma direta, clara e motivadora.
+    return `Você é uma IA financeira direta e objetiva integrada ao app "Desafio Financeiro".
 
-=== DADOS ATUAIS DO SISTEMA ===
+REGRAS ABSOLUTAS:
+1. Nunca use mais de 200 palavras por resposta.
+2. Nunca explique conceitos básicos que o usuário já sabe.
+3. Nunca sugira "usar o cofre de metas" como dica — o cofre é um REGISTRO AUTOMÁTICO de fases concluídas do desafio, não uma conta separada.
+4. Sempre use os números reais abaixo. Nunca invente ou estime valores.
+5. Seja direto: diagnóstico → número → ação. Sem rodeios.
 
-🎯 DESAFIO:
-- Meta total: ${fmt(obj)}
-- Valor acumulado: ${fmt(somaDesc)} (${pctDesc}% da meta)
-- Valor que falta: ${fmt(faltaDesc)}
-- Quadros marcados: ${marcQuad} de ${totalQuad}
-- Progresso: ${pctDesc}%
-
-🏦 POUPANÇA:
-- Total de entradas: ${fmt(totalEnt)}
-- Total de saídas: ${fmt(totalSai)}
-- Saldo atual da poupança: ${fmt(saldoPoup)}
-- Total de movimentações: ${movsRaw.length}
-
-📋 ÚLTIMAS MOVIMENTAÇÕES:
-${ultMovs || '  (nenhuma movimentação ainda)'}
-
-🔒 COFRE DE METAS:
-- Valor no cofre: ${fmt(cofre.total)}
-- Fases concluídas: ${cofre.fases.length}
-
-================================
-Use esses dados para responder com precisão. Nunca pergunte valores que já constam acima.`;
+DADOS DO SISTEMA (tempo real):
+- Meta: ${fmt(obj)}
+- Acumulado no desafio: ${fmt(soma)} (${pct}%)
+- Falta para a meta: ${fmt(falta)}
+- Quadros marcados: ${marcados.size} / ${valores.length}
+- Entradas na poupança: ${fmt(totalEnt)}
+- Saídas na poupança: ${fmt(totalSai)}
+- Saldo poupança: ${fmt(totalEnt - totalSai)}
+- Cofre (fases concluídas): ${cofre.fases.length} fase(s) — total acumulado em fases: ${fmt(cofre.total)}
+- Últimas movimentações:
+${ultMovs || '  (nenhuma ainda)'}`;
   }
 
   async function iaChatGroq(mensagemUsuario, isPlano) {
