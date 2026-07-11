@@ -698,13 +698,12 @@
   .g100 { background:#1e293b; color:#d8b4fe; border-color:#6d28d9; }
   .gX   { background:#1e293b; color:#94a3b8; border-color:#334155; }
 
-  .item.checked             { filter: brightness(1.8); }
-  .item.checked.g10         { background:#1d4ed8; color:#fff; }
-  .item.checked.g20         { background:#047857; color:#fff; }
-  .item.checked.g30         { background:#b45309; color:#fff; }
-  .item.checked.g50         { background:#9d174d; color:#fff; }
-  .item.checked.g100        { background:#6d28d9; color:#fff; }
-  .item.checked.gX          { background:#334155; color:#fff; }
+  .item.checked.g10         { background:#1d4ed8; color:#cfe0ff; border-color:#3b82f6; }
+  .item.checked.g20         { background:#047857; color:#bbf7d0; border-color:#22c55e; }
+  .item.checked.g30         { background:#92400e; color:#fef3c7; border-color:#f59e0b; }
+  .item.checked.g50         { background:#831843; color:#fce7f3; border-color:#ec4899; }
+  .item.checked.g100        { background:#4c1d95; color:#ede9fe; border-color:#8b5cf6; }
+  .item.checked.gX          { background:#1e293b; color:#cbd5e1; border-color:#475569; }
 </style>
 </head>
 <body>
@@ -1239,21 +1238,14 @@
   }
 
   function sair() {
+    // Apaga o auto-login para que o refresh não entre sozinho
+    localStorage.removeItem('desafio_lembrar_v1');
+    localStorage.removeItem('desafio_lembrar_user');
     document.getElementById('dashScreen').style.display  = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
-    // Mantém usuário pré-preenchido se "Lembrar de mim" estava ativo
-    const lembrado = localStorage.getItem('desafio_lembrar_v1');
-    if (lembrado) {
-      try {
-        const {u} = JSON.parse(lembrado);
-        document.getElementById('inUser').value = u;
-        document.getElementById('chkLembrar').checked = true;
-      } catch(e) {}
-    } else {
-      document.getElementById('inUser').value = '';
-      document.getElementById('chkLembrar').checked = false;
-    }
-    document.getElementById('inPass').value = '';
+    document.getElementById('inUser').value  = '';
+    document.getElementById('inPass').value  = '';
+    document.getElementById('chkLembrar').checked = false;
     document.getElementById('loginErr').innerText = '';
   }
 
