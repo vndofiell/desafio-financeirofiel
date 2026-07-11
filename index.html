@@ -707,6 +707,91 @@
   .item.checked.g100        { background:#4c1d95; color:#ede9fe; border-color:#8b5cf6; }
   .item.checked.gX          { background:#1e293b; color:#cbd5e1; border-color:#475569; }
 
+  /* ── Aba IA ── */
+  .ia-wrap {
+    display: flex; flex: 1; overflow: hidden; gap: 0;
+  }
+  .ia-left {
+    width: 300px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 16px 14px; gap: 10px; overflow-y: auto;
+  }
+  .ia-right {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .ia-chat-box {
+    flex: 1; overflow-y: auto; padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ia-chat-box::-webkit-scrollbar { width: 4px; }
+  .ia-chat-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+  .msg-ia, .msg-user {
+    max-width: 80%; padding: 10px 14px;
+    border-radius: 14px; font-size: 0.88rem; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .msg-ia   { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; color: var(--text); border-radius: 4px 14px 14px 14px; }
+  .msg-user { background: #7c3aed; color: #fff; align-self: flex-end; border-radius: 14px 4px 14px 14px; }
+  .msg-typing { opacity: 0.5; font-style: italic; }
+  .ia-input-row {
+    display: flex; gap: 8px; padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .ia-input-row textarea {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-size: 0.9rem;
+    padding: 9px 12px; outline: none; resize: none;
+    font-family: inherit; line-height: 1.5; max-height: 120px;
+    transition: border-color 0.2s;
+  }
+  .ia-input-row textarea:focus { border-color: #a855f7; }
+  .ia-input-row .btn-send {
+    padding: 9px 16px; background: #7c3aed; color: #fff;
+    border: none; border-radius: 10px; font-size: 0.9rem;
+    font-weight: 700; cursor: pointer; align-self: flex-end;
+    transition: opacity 0.2s; white-space: nowrap;
+  }
+  .ia-input-row .btn-send:hover { opacity: 0.85; }
+  .ia-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+  }
+  .ia-card .ia-card-label {
+    font-size: 0.65rem; color: #a855f7; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 4px; font-weight: 700;
+  }
+  .ia-card .ia-card-val {
+    font-size: 1.1rem; font-weight: 700; color: var(--text);
+  }
+  .ia-card .ia-card-sub {
+    font-size: 0.72rem; color: var(--muted); margin-top: 2px;
+  }
+  .ia-key-wrap {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+  }
+  .ia-key-wrap label {
+    font-size: 0.65rem; color: #a855f7; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 5px; display: block; font-weight: 700;
+  }
+  .ia-key-wrap input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 7px; color: var(--text); font-size: 0.78rem;
+    padding: 7px 10px; outline: none; transition: border-color 0.2s;
+  }
+  .ia-key-wrap input:focus { border-color: #a855f7; }
+  .ia-key-wrap .btn-salvar-key {
+    margin-top: 6px; width: 100%; padding: 7px;
+    background: #7c3aed; color: #fff; border: none;
+    border-radius: 7px; font-size: 0.8rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .ia-key-wrap .btn-salvar-key:hover { opacity: 0.85; }
+
   /* ── Calculadora ── */
   .cbtn {
     padding: 0;
@@ -813,6 +898,7 @@
       <button class="tab-btn active" onclick="mudarAba('desafio')">🎯 Desafio</button>
       <button class="tab-btn"        onclick="mudarAba('poupanca')">🏦 Poupança</button>
       <button class="tab-btn"        onclick="mudarAba('calculadora')">🧮 Calculadora</button>
+      <button class="tab-btn"        onclick="mudarAba('ia')" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border-color:#7c3aed;">🤖 IA</button>
       <button class="tab-btn"        onclick="mudarAba('config')">⚙️ Conta</button>
     </div>
     <span class="user" id="userLabel"></span>
@@ -1072,6 +1158,92 @@
     </div>
   </div>
   </div><!-- fim tabCalculadora -->
+
+  <!-- ══ ABA: IA FINANCEIRA ══ -->
+  <div class="tab-panel" id="tabIa">
+  <div class="ia-wrap">
+
+    <!-- Painel esquerdo: análise automática + chave API -->
+    <div class="ia-left">
+
+      <div style="font-size:0.75rem;font-weight:700;color:#a855f7;text-transform:uppercase;letter-spacing:1px;">
+        🤖 Análise do Desafio
+      </div>
+
+      <div class="ia-card">
+        <div class="ia-card-label">Meta atual</div>
+        <div class="ia-card-val" id="ia_meta">—</div>
+      </div>
+      <div class="ia-card">
+        <div class="ia-card-label">Acumulado</div>
+        <div class="ia-card-val" id="ia_acum">—</div>
+      </div>
+      <div class="ia-card">
+        <div class="ia-card-label">Falta</div>
+        <div class="ia-card-val" id="ia_falta" style="color:#fb923c;">—</div>
+      </div>
+      <div class="ia-card">
+        <div class="ia-card-label">📅 Prazo (dias úteis)</div>
+        <div style="display:flex;gap:6px;margin-top:4px;">
+          <input type="number" id="ia_dias" placeholder="Ex: 30" min="1"
+                 oninput="iaCalcular()"
+                 style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;padding:6px 8px;outline:none;" />
+        </div>
+      </div>
+      <div class="ia-card" style="border-color:#7c3aed;">
+        <div class="ia-card-label" style="color:#a855f7;">💰 Por dia (conservador)</div>
+        <div class="ia-card-val" id="ia_pordia" style="color:#a855f7;">—</div>
+        <div class="ia-card-sub" id="ia_pordiaDesc">Digite o prazo em dias</div>
+      </div>
+      <div class="ia-card">
+        <div class="ia-card-label">📊 Por semana</div>
+        <div class="ia-card-val" id="ia_porsemana">—</div>
+      </div>
+      <div class="ia-card">
+        <div class="ia-card-label">📆 Por mês</div>
+        <div class="ia-card-val" id="ia_pormes">—</div>
+      </div>
+
+      <button onclick="iaAnalisarComGroq()" style="
+        width:100%;padding:10px;background:linear-gradient(135deg,#7c3aed,#a855f7);
+        color:#fff;border:none;border-radius:8px;font-size:0.85rem;font-weight:700;
+        cursor:pointer;transition:opacity 0.2s;margin-top:4px;">
+        ✨ Gerar Plano com IA
+      </button>
+
+      <!-- Chave API -->
+      <div class="ia-key-wrap" style="margin-top:auto;">
+        <label>🔑 Chave API Groq</label>
+        <input type="password" id="ia_apikey" placeholder="gsk_..."
+               onchange="iaSalvarKey()" />
+        <button class="btn-salvar-key" onclick="iaSalvarKey()">Salvar chave</button>
+        <div style="font-size:0.65rem;color:var(--muted);margin-top:6px;line-height:1.5;">
+          Gratuito em <strong style="color:#a855f7;">console.groq.com</strong><br>
+          Sua chave fica salva só no seu navegador.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Painel direito: chat -->
+    <div class="ia-right">
+      <div class="ia-chat-box" id="iaChatBox">
+        <div class="msg-ia">
+          👋 Olá! Sou sua <strong>IA Financeira</strong> powered by Groq.<br><br>
+          Posso te ajudar a criar um plano para conquistar sua meta, calcular quanto juntar por dia, semana ou mês, e responder qualquer dúvida financeira.<br><br>
+          Clique em <strong>✨ Gerar Plano com IA</strong> para uma análise completa, ou me faça uma pergunta!
+        </div>
+      </div>
+      <div class="ia-input-row">
+        <textarea id="iaMsgInput" rows="1" placeholder="Pergunte algo para a IA..."
+                  onkeydown="if(event.key==='Enter'&&!event.shiftKey){iaEnviar();event.preventDefault();}"
+                  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <button class="btn-send" onclick="iaEnviar()">Enviar ➤</button>
+      </div>
+    </div>
+
+  </div>
+  </div><!-- fim tabIa -->
 
   <!-- ══ MODAL: ALTERAR OBJETIVO ══ -->
   <div id="modalObjetivo" style="
@@ -2208,6 +2380,164 @@
   function calcLimparHist() {
     _cHist = [];
     _cRenderHist();
+  }
+
+  // ══════════════════════════════════════════════
+  // IA FINANCEIRA (Groq)
+  // ══════════════════════════════════════════════
+  const IA_KEY_STORE = 'desafio_groq_key_v1';
+
+  function iaSalvarKey() {
+    const k = document.getElementById('ia_apikey').value.trim();
+    if (k) { localStorage.setItem(IA_KEY_STORE, k); }
+    else    { localStorage.removeItem(IA_KEY_STORE); }
+    document.getElementById('ia_apikey').blur();
+  }
+
+  function iaGetKey() {
+    return localStorage.getItem(IA_KEY_STORE) || '';
+  }
+
+  // Preenche painél ao abrir a aba
+  function iaInicializar() {
+    const key = iaGetKey();
+    if (key) document.getElementById('ia_apikey').value = key;
+    iaAtualizarCards();
+    iaCalcular();
+  }
+
+  function iaAtualizarCards() {
+    const obj  = getObjetivo();
+    let soma = 0;
+    marcados.forEach(i => soma += valorReal(i));
+    const falta = Math.max(obj - soma, 0);
+    document.getElementById('ia_meta').innerText  = fmt(obj);
+    document.getElementById('ia_acum').innerText  = fmt(soma);
+    document.getElementById('ia_falta').innerText = fmt(falta);
+    return { obj, soma, falta };
+  }
+
+  function iaCalcular() {
+    const dias = parseInt(document.getElementById('ia_dias').value) || 0;
+    const { falta } = iaAtualizarCards();
+    if (dias < 1 || falta <= 0) {
+      document.getElementById('ia_pordia').innerText     = '—';
+      document.getElementById('ia_porsemana').innerText  = '—';
+      document.getElementById('ia_pormes').innerText     = '—';
+      document.getElementById('ia_pordiaDesc').innerText = dias < 1 ? 'Digite o prazo em dias' : '🎉 Meta atingida!';
+      return;
+    }
+    // Modo conservador: divide o faltante pelo número de dias e arredonda para cima
+    const porDia    = Math.ceil((falta / dias) * 100) / 100;
+    const porSemana = Math.ceil(porDia * 7 * 100) / 100;
+    const porMes    = Math.ceil(porDia * 30 * 100) / 100;
+    document.getElementById('ia_pordia').innerText     = fmt(porDia);
+    document.getElementById('ia_porsemana').innerText  = fmt(porSemana);
+    document.getElementById('ia_pormes').innerText     = fmt(porMes);
+    document.getElementById('ia_pordiaDesc').innerText = `em ${dias} dias · modo conservador`;
+  }
+
+  // Adiciona mensagem no chat
+  function iaAddMsg(texto, tipo) {
+    const box = document.getElementById('iaChatBox');
+    const div = document.createElement('div');
+    div.className = tipo === 'user' ? 'msg-user' : 'msg-ia';
+    div.innerHTML = texto;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    return div;
+  }
+
+  // Envia mensagem do usuário
+  async function iaEnviar() {
+    const inp = document.getElementById('iaMsgInput');
+    const txt = inp.value.trim();
+    if (!txt) return;
+    inp.value = '';
+    inp.style.height = 'auto';
+    iaAddMsg(txt, 'user');
+    await iaChatGroq(txt);
+  }
+
+  // Gera plano completo automaticamente
+  async function iaAnalisarComGroq() {
+    const { obj, soma, falta } = iaAtualizarCards();
+    const dias = parseInt(document.getElementById('ia_dias').value) || 30;
+    const pct  = Math.round((soma / obj) * 100);
+    const porDia = falta > 0 ? Math.ceil((falta / dias) * 100) / 100 : 0;
+
+    const prompt = `Você é um consultor financeiro pessoal brasileiro, especialista em metas de poupança. Fale em português do Brasil, de forma clara, motivadora e objetiva.
+
+Dados do usuário:
+- Meta total: ${fmt(obj)}
+- Valor já acumulado: ${fmt(soma)} (${pct}% da meta)
+- Valor que ainda falta: ${fmt(falta)}
+- Prazo desejado: ${dias} dias
+- Valor necessário por dia (modo conservador): ${fmt(porDia)}
+
+Com base nesses dados, faça:
+1. Uma análise rápida da situação atual
+2. Um plano semanal conservador e realista para atingir a meta
+3. 3 dicas práticas e específicas para juntar dinheiro mais rápido
+4. Uma mensagem motivacional personalizada
+
+Seja direto, use emojis com moderação e formate com bullet points quando útil.`;
+
+    iaAddMsg(`✨ Gerando seu plano personalizado...`, 'ia');
+    await iaChatGroq(prompt, true);
+  }
+
+  // Chama a API Groq
+  async function iaChatGroq(mensagemUsuario, isPlano) {
+    const key = iaGetKey();
+    if (!key) {
+      iaAddMsg('⚠️ Configure sua chave API Groq no painel esquerdo.
+
+Acesse <strong>console.groq.com</strong>, crie uma conta gratuita e gere sua API Key.', 'ia');
+      return;
+    }
+
+    const typing = iaAddMsg('⏳ Pensando...', 'ia');
+    typing.classList.add('msg-typing');
+
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + key,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama3-8b-8192',
+          messages: [
+            {
+              role: 'system',
+              content: 'Você é uma IA financeira pessoal integrada a um sistema de desafio de poupança chamado "Desafio Financeiro". Responda sempre em português do Brasil, de forma clara e objetiva. Foque em orientações práticas sobre poupar dinheiro, atingir metas financeiras e controle financeiro pessoal.'
+            },
+            { role: 'user', content: mensagemUsuario }
+          ],
+          temperature: 0.7,
+          max_tokens: 1024
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        typing.innerText = '❌ Erro: ' + (data.error?.message || 'Verifique sua chave API.');
+        typing.classList.remove('msg-typing');
+        return;
+      }
+
+      const resposta = data.choices[0].message.content;
+      typing.innerHTML = resposta.replace(/
+/g, '<br>');
+      typing.classList.remove('msg-typing');
+
+    } catch(e) {
+      typing.innerText = '❌ Erro de conexão. Verifique sua internet.';
+      typing.classList.remove('msg-typing');
+    }
   }
 
   // Suporte ao teclado na aba calculadora
