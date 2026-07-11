@@ -786,6 +786,11 @@
         <div class="label">Depósitos</div>
         <div class="value" id="cDepositos">—</div>
       </div>
+      <div class="card" style="background:linear-gradient(135deg,#1a0533,#2d1049);border-color:#4a1d7a;">
+        <div class="label" style="color:#c084fc;">🏦 Cofre de Metas</div>
+        <div class="value" id="cCofre" style="color:#a855f7;">R$ 0,00</div>
+        <div style="font-size:0.7rem;color:#9f6fc4;margin-top:4px;" id="cCofreFases">0 fase(s) concluída(s)</div>
+      </div>
 
       <!-- Progresso -->
       <div>
@@ -1176,6 +1181,24 @@
     return ajustes[i] !== undefined ? ajustes[i] : valores[i];
   }
 
+  // ── Cofre de Metas ──
+  const CHAVE_COFRE = 'desafio_cofre_v1';
+
+  function carregarCofre() {
+    try { return JSON.parse(localStorage.getItem(CHAVE_COFRE) || '{"total":0,"fases":[]}'); }
+    catch(e) { return {"total":0,"fases":[]}; }
+  }
+
+  function salvarCofre(cofre) {
+    localStorage.setItem(CHAVE_COFRE, JSON.stringify(cofre));
+  }
+
+  function atualizarCardCofre() {
+    const cofre = carregarCofre();
+    document.getElementById('cCofre').innerText = fmt(cofre.total);
+    document.getElementById('cCofreFases').innerText = cofre.fases.length + ' fase(s) concluída(s)';
+  }
+
   // ── Atualiza cards e barra ──
   function atualizar() {
     let soma = 0;
@@ -1190,6 +1213,12 @@
     document.getElementById('barFill').style.width  = pct + '%';
     document.getElementById('pctLabel').innerText   = Math.round(pct) + '%';
     document.getElementById('barPct').innerText     = Math.round(pct) + '% concluido';
+    atualizarCardCofre();
+
+    // Detecta fase completa: todos os quadros marcados E soma >= objetivo
+    if (marcados.size === valores.length && soma >= obj - 0.005 && valores.length > 0) {
+      setTimeout(abrirModalFaseConcluida, 400);
+    }
   }
 
   // Retorna a classe CSS de cor conforme o valor do quadro
@@ -1233,7 +1262,7 @@
         const estavaMarcado = marcados.has(i);
         estavaMarcado ? marcados.delete(i) : marcados.add(i);
         d.className = 'item ' + g + (marcados.has(i) ? ' checked' : '');
-        salvar(); atualizar();
+        salvar();
         // Integração com Poupança
         const v = valorReal(i);
         if (!estavaMarcado) {
@@ -1241,6 +1270,7 @@
         } else {
           registrarMovPoupanca('saida', v, `Desafio — estorno quadro R$ ${v}`);
         }
+        atualizar();
       };
       grid.appendChild(d);
     });
@@ -1759,6 +1789,137 @@
     const t = localStorage.getItem('tema_desafio') || 'escuro';
     document.body.className = t && t !== 'escuro' ? 'tema-' + t : '';
   })();
+
+  // ══════════════════════════════════════════════
+  // SISTEMA DE FASES + COFRE DE METAS
+  // ══════════════════════════════════════════════
+
+  let _faseConcluindoAberta = false;
+
+  function abrirModalFaseConcluida() {
+    // Evita abrir duas vezes seguidas
+    if (_faseConcluindoAberta) return;
+    _faseConcluindoAberta = true;
+    const obj = getObjetivo();
+    document.getElementById('faseValorConcluidoLabel').innerText = fmt(obj);
+    const proxFase = carregarCofre().fases.length + 1;
+    document.getElementById('faseNumLabel').innerText = proxFase;
+    document.getElementById('faseNumBtnLabel').innerText = proxFase + 1;
+    document.getElementById('faseNovoValor').value = '';
+    document.getElementById('faseErro').innerText = '';
+    document.getElementById('modalFaseConcluida').style.display = 'flex';
+    setTimeout(() => document.getElementById('faseNovoValor').focus(), 100);
+  }
+
+  function fecharModalFase() {
+    document.getElementById('modalFaseConcluida').style.display = 'none';
+    _faseConcluindoAberta = false;
+  }
+
+  function confirmarProximaFase() {
+    const raw = document.getElementById('faseNovoValor').value.trim().replace(',','.');
+    const novoObj = parseFloat(raw);
+    const erroEl  = document.getElementById('faseErro');
+    if (isNaN(novoObj) || novoObj < 1) {
+      erroEl.innerText = 'Digite um valor válido (mínimo R$ 1,00).';
+      return;
+    }
+
+    // 1. Registra no Cofre de Metas
+    const obj    = getObjetivo();
+    const cofre  = carregarCofre();
+    const numFase = cofre.fases.length + 1;
+    cofre.fases.push({ fase: numFase, meta: obj, data: new Date().toLocaleDateString('pt-BR') });
+    cofre.total  = Math.round((cofre.total + obj) * 100) / 100;
+    salvarCofre(cofre);
+
+    // 2. Registra na Poupança como entrada especial
+    registrarMovPoupanca('entrada', obj, `🏆 Fase ${numFase} concluída — meta ${fmt(obj)} no cofre`);
+
+    // 3. Apaga dados da fase antiga
+    localStorage.removeItem('desafio_v4_marcados_' + obj);
+    localStorage.removeItem('desafio_v4_ajustes_'  + obj);
+    localStorage.removeItem('desafio_v4_extras_'   + obj);
+    localStorage.removeItem('desafio_v4_objetivo_' + obj);
+
+    // 4. Configura nova fase
+    CHAVE_M = 'desafio_v4_marcados_' + novoObj;
+    CHAVE_A = 'desafio_v4_ajustes_'  + novoObj;
+    CHAVE_E = 'desafio_v4_extras_'   + novoObj;
+    localStorage.setItem(CHAVE_OBJ_INICIAL, novoObj);
+    extras   = [];
+    marcados = new Set();
+    ajustes  = {};
+    gerarQuadros(novoObj);
+    valores  = [...valoresBase];
+    salvar();
+
+    fecharModalFase();
+    renderGrid();
+    atualizarCardCofre();
+  }
 </script>
+
+<!-- ══ MODAL: FASE CONCLUÍDA ══ -->
+<div id="modalFaseConcluida" style="
+  display:none; position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,0.85);
+  align-items:center; justify-content:center;">
+  <div style="
+    background:var(--surface); border:2px solid #a855f7;
+    border-radius:24px; padding:40px 44px; width:460px;
+    text-align:center; position:relative;">
+
+    <!-- Confete visual simples -->
+    <div style="font-size:3rem;margin-bottom:10px;">🏆</div>
+
+    <h2 style="color:#a855f7;font-size:1.5rem;margin-bottom:6px;">
+      Fase <span id="faseNumLabel">1</span> Concluída!
+    </h2>
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:6px;line-height:1.6;">
+      Parabéns! Você completou sua meta de
+    </p>
+    <div style="font-size:1.8rem;font-weight:700;color:#4ade80;margin-bottom:16px;" id="faseValorConcluidoLabel">—</div>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:6px;">
+      Esse valor foi enviado para o <strong style="color:#a855f7;">🏦 Cofre de Metas</strong>.<br>
+      Deseja iniciar a próxima fase? Qual será a nova meta?
+    </p>
+
+    <!-- Quick picks -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:14px 0;">
+      <button onclick="document.getElementById('faseNovoValor').value=1000;document.getElementById('faseErro').innerText=''" style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 1.000</button>
+      <button onclick="document.getElementById('faseNovoValor').value=3000;document.getElementById('faseErro').innerText=''" style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 3.000</button>
+      <button onclick="document.getElementById('faseNovoValor').value=5000;document.getElementById('faseErro').innerText=''" style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 5.000</button>
+      <button onclick="document.getElementById('faseNovoValor').value=6000;document.getElementById('faseErro').innerText=''" style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 6.000</button>
+      <button onclick="document.getElementById('faseNovoValor').value=10000;document.getElementById('faseErro').innerText=''" style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 10.000</button>
+      <button onclick="document.getElementById('faseNovoValor').value=20000;document.getElementById('faseErro').innerText=''" style="padding:5px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;color:var(--muted2);font-size:.78rem;cursor:pointer;">R$ 20.000</button>
+    </div>
+
+    <!-- Input valor nova fase -->
+    <div style="display:flex;align-items:center;background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:4px 4px 4px 14px;margin-bottom:6px;transition:border-color .2s" id="faseWrap">
+      <span style="font-size:1rem;font-weight:700;color:#a855f7;margin-right:8px;white-space:nowrap">R$</span>
+      <input type="number" id="faseNovoValor" placeholder="0,00" min="1" step="0.01"
+             onkeydown="if(event.key==='Enter') confirmarProximaFase()"
+             onfocus="document.getElementById('faseWrap').style.borderColor='#a855f7'"
+             onblur="document.getElementById('faseWrap').style.borderColor='var(--border)'"
+             style="flex:1;background:none;border:none;outline:none;font-size:1.3rem;font-weight:700;color:var(--text);padding:10px 0;" />
+    </div>
+    <div id="faseErro" style="color:#f87171;font-size:0.82rem;min-height:18px;margin-bottom:14px;"></div>
+
+    <div style="display:flex;gap:10px;">
+      <button onclick="fecharModalFase()" style="
+        flex:1;padding:12px;background:var(--border);border:none;
+        border-radius:8px;color:var(--text);font-weight:600;cursor:pointer;font-size:0.9rem;">
+        Agora não
+      </button>
+      <button onclick="confirmarProximaFase()" style="
+        flex:1;padding:12px;background:#a855f7;border:none;
+        border-radius:8px;color:#fff;font-weight:700;cursor:pointer;font-size:0.9rem;">
+        🚀 Iniciar Fase <span id="faseNumBtnLabel">2</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
