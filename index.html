@@ -934,7 +934,8 @@
         </div>
 
         <input type="text"   id="movDesc"  placeholder="Descrição (ex: Salário, Aluguel...)" />
-        <input type="number" id="movValor" placeholder="Valor R$" min="0.01" step="0.01"
+        <input type="text" id="movValor" placeholder="0,00" inputmode="numeric"
+               oninput="mascaraDeposito(this)"
                onkeydown="if(event.key==='Enter') adicionarMov()" />
         <input type="date"   id="movData" />
 
@@ -1626,7 +1627,7 @@
 
   function adicionarMov() {
     const desc  = document.getElementById('movDesc').value.trim();
-    const valor = parseFloat(document.getElementById('movValor').value);
+    const valor = parseFloat(document.getElementById('movValor').value.replace(/\./g, '').replace(',', '.'));
     const data  = document.getElementById('movData').value;
 
     if (!desc)         { alert('Digite uma descrição.'); return; }
