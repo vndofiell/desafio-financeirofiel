@@ -1170,9 +1170,10 @@
       CHAVE_E = 'desafio_v4_extras_'   + objSalvo;
       gerarQuadros(objSalvo);
       document.getElementById('configScreen').style.display = 'none';
-      // Verifica "Lembrar de mim" — faz login automático se salvo
+      // Verifica "Lembrar de mim" — faz auto-login se não clicou Sair
       const lembrado = localStorage.getItem('desafio_lembrar_v1');
-      if (lembrado) {
+      const saiu     = sessionStorage.getItem('desafio_saiu');
+      if (lembrado && !saiu) {
         try {
           const {u, p} = JSON.parse(lembrado);
           USUARIOS = carregarUsuarios();
@@ -1183,9 +1184,14 @@
         } catch(e) { localStorage.removeItem('desafio_lembrar_v1'); }
       }
       document.getElementById('loginScreen').style.display = 'flex';
-      // Pré-preenche os campos se lembrado mas senha errada
-      const preUser = localStorage.getItem('desafio_lembrar_user');
-      if (preUser) document.getElementById('inUser').value = preUser;
+      // Pré-preenche o usuário se lembrar de mim estiver ativo
+      if (lembrado) {
+        try {
+          const {u} = JSON.parse(lembrado);
+          document.getElementById('inUser').value = u;
+          document.getElementById('chkLembrar').checked = true;
+        } catch(e) {}
+      }
     }
   })();
 
@@ -1199,13 +1205,13 @@
     USUARIOS = carregarUsuarios();
 
     if (USUARIOS[u] && USUARIOS[u] === p) {
+      // Limpa a flag de "saiu" — próximo refresh faz auto-login normalmente
+      sessionStorage.removeItem('desafio_saiu');
       // Salva ou limpa o "Lembrar de mim"
       if (lembrar) {
         localStorage.setItem('desafio_lembrar_v1', JSON.stringify({u, p}));
-        localStorage.setItem('desafio_lembrar_user', u);
       } else {
         localStorage.removeItem('desafio_lembrar_v1');
-        localStorage.removeItem('desafio_lembrar_user');
       }
       _entrarDashboard(u, p);
     } else {
@@ -1240,14 +1246,23 @@
   }
 
   function sair() {
-    // Apaga o auto-login para que o refresh não entre sozinho
-    localStorage.removeItem('desafio_lembrar_v1');
-    localStorage.removeItem('desafio_lembrar_user');
+    // Marca na sessão que o usuário clicou Sair — impede auto-login no refresh
+    sessionStorage.setItem('desafio_saiu', '1');
     document.getElementById('dashScreen').style.display  = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('inUser').value  = '';
+    // Se "Lembrar de mim" está ativo, pré-preenche o usuário mas limpa a senha
+    const lembrado = localStorage.getItem('desafio_lembrar_v1');
+    if (lembrado) {
+      try {
+        const {u} = JSON.parse(lembrado);
+        document.getElementById('inUser').value = u;
+        document.getElementById('chkLembrar').checked = true;
+      } catch(e) {}
+    } else {
+      document.getElementById('inUser').value = '';
+      document.getElementById('chkLembrar').checked = false;
+    }
     document.getElementById('inPass').value  = '';
-    document.getElementById('chkLembrar').checked = false;
     document.getElementById('loginErr').innerText = '';
   }
 
