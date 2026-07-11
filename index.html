@@ -770,6 +770,15 @@
     <input type="password" id="inPass" placeholder="••••••••"
            onkeydown="if(event.key==='Enter') fazerLogin()" />
 
+    <!-- Lembrar de mim -->
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;
+      font-size:0.82rem;color:var(--muted2);text-transform:none;letter-spacing:0;
+      margin-bottom:4px;margin-top:-6px;">
+      <input type="checkbox" id="chkLembrar" style="
+        width:15px;height:15px;accent-color:var(--accent);cursor:pointer;" />
+      Lembrar de mim
+    </label>
+
     <button class="btn-login" onclick="fazerLogin()">Entrar</button>
     <div class="login-error" id="loginErr"></div>
     <button onclick="resetarCredenciais()" style="
@@ -1151,13 +1160,27 @@
     // Se já tem objetivo salvo, pula a tela de configuração
     const objSalvo = parseFloat(localStorage.getItem(CHAVE_OBJ_INICIAL));
     if (!isNaN(objSalvo) && objSalvo >= 1) {
-      // Update dynamic storage keys to match the saved goal
       CHAVE_M = 'desafio_v4_marcados_' + objSalvo;
       CHAVE_A = 'desafio_v4_ajustes_'  + objSalvo;
       CHAVE_E = 'desafio_v4_extras_'   + objSalvo;
       gerarQuadros(objSalvo);
       document.getElementById('configScreen').style.display = 'none';
-      document.getElementById('loginScreen').style.display  = 'flex';
+      // Verifica "Lembrar de mim" — faz login automático se salvo
+      const lembrado = localStorage.getItem('desafio_lembrar_v1');
+      if (lembrado) {
+        try {
+          const {u, p} = JSON.parse(lembrado);
+          USUARIOS = carregarUsuarios();
+          if (USUARIOS[u] && USUARIOS[u] === p) {
+            _entrarDashboard(u, p);
+            return;
+          }
+        } catch(e) { localStorage.removeItem('desafio_lembrar_v1'); }
+      }
+      document.getElementById('loginScreen').style.display = 'flex';
+      // Pré-preenche os campos se lembrado mas senha errada
+      const preUser = localStorage.getItem('desafio_lembrar_user');
+      if (preUser) document.getElementById('inUser').value = preUser;
     }
   })();
 
@@ -1165,11 +1188,27 @@
   function fazerLogin() {
     const u = document.getElementById('inUser').value.trim();
     const p = document.getElementById('inPass').value;
+    const lembrar = document.getElementById('chkLembrar').checked;
 
     // Recarrega usuários do localStorage na hora do login (garante dados frescos)
     USUARIOS = carregarUsuarios();
 
     if (USUARIOS[u] && USUARIOS[u] === p) {
+      // Salva ou limpa o "Lembrar de mim"
+      if (lembrar) {
+        localStorage.setItem('desafio_lembrar_v1', JSON.stringify({u, p}));
+        localStorage.setItem('desafio_lembrar_user', u);
+      } else {
+        localStorage.removeItem('desafio_lembrar_v1');
+        localStorage.removeItem('desafio_lembrar_user');
+      }
+      _entrarDashboard(u, p);
+    } else {
+      document.getElementById('loginErr').innerText = '❌ Usuário ou senha incorretos.';
+    }
+  }
+
+  function _entrarDashboard(u, p) {
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('dashScreen').style.display  = 'flex';
       document.getElementById('userLabel').innerText = '👤 ' + u;
@@ -1193,15 +1232,23 @@
       const sel = document.getElementById('temaSelect');
       document.body.className = temaSalvo && temaSalvo !== 'escuro' ? 'tema-' + temaSalvo : '';
       if (sel) sel.value = temaSalvo;
-    } else {
-      document.getElementById('loginErr').innerText = '❌ Usuário ou senha incorretos.';
-    }
   }
 
   function sair() {
     document.getElementById('dashScreen').style.display  = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('inUser').value = '';
+    // Mantém usuário pré-preenchido se "Lembrar de mim" estava ativo
+    const lembrado = localStorage.getItem('desafio_lembrar_v1');
+    if (lembrado) {
+      try {
+        const {u} = JSON.parse(lembrado);
+        document.getElementById('inUser').value = u;
+        document.getElementById('chkLembrar').checked = true;
+      } catch(e) {}
+    } else {
+      document.getElementById('inUser').value = '';
+      document.getElementById('chkLembrar').checked = false;
+    }
     document.getElementById('inPass').value = '';
     document.getElementById('loginErr').innerText = '';
   }
