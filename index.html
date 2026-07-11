@@ -7,42 +7,38 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── Cofre de Metas — borda giratória ── */
-  @keyframes cofre-spin {
-    0%   { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  /* ── Cofre de Metas — traço circulando na borda (SVG stroke) ── */
+  @keyframes cofre-dash {
+    0%   { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -440; }
   }
   .cofre-wrap {
     position: relative;
     border-radius: 12px;
-    padding: 2px;
-    background: transparent;
+    background: linear-gradient(135deg, #1a0533, #2d1049);
+    border: 1px solid #4a1d7a;
   }
-  .cofre-wrap .cofre-glow {
+  .cofre-wrap > svg.cofre-border {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(
-      transparent 0deg,
-      transparent 120deg,
-      #a855f7 150deg,
-      #e879f9 180deg,
-      #a855f7 210deg,
-      transparent 240deg,
-      transparent 360deg
-    );
-    animation: cofre-spin 3s linear infinite;
-    z-index: 0;
-    border-radius: 50%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    border-radius: 12px;
+  }
+  .cofre-wrap > svg.cofre-border rect {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke: url(#cofreGrad);
+    stroke-dasharray: 60 380;
+    animation: cofre-dash 2.5s linear infinite;
   }
   .cofre-card {
     position: relative;
-    z-index: 1;
     border-radius: 10px;
     padding: 14px 16px;
-    background: linear-gradient(135deg, #1a0533, #2d1049);
+    background: transparent;
   }
 
   /* ── Variáveis de tema (padrão: escuro) ── */
@@ -834,7 +830,18 @@
         <div class="value" id="cDepositos">—</div>
       </div>
       <div class="cofre-wrap">
-        <div class="cofre-glow"></div>
+        <!-- SVG traço circulando -->
+        <svg class="cofre-border" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="cofreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#a855f7"/>
+              <stop offset="50%"  stop-color="#e879f9"/>
+              <stop offset="100%" stop-color="#a855f7"/>
+            </linearGradient>
+          </defs>
+          <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="11" ry="11"
+                style="width:calc(100% - 2px);height:calc(100% - 2px);"/>
+        </svg>
         <div class="cofre-card">
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div class="label" style="color:#c084fc;">🏦 Cofre de Metas</div>
@@ -1293,6 +1300,31 @@
     const cofre = carregarCofre();
     document.getElementById('cCofre').innerText = fmt(cofre.total);
     document.getElementById('cCofreFases').innerText = cofre.fases.length + ' fase(s) concluída(s)';
+    // Ajusta o rect SVG ao tamanho real do wrapper
+    requestAnimationFrame(() => {
+      const wrap = document.querySelector('.cofre-wrap');
+      const rect = document.querySelector('.cofre-border rect');
+      if (!wrap || !rect) return;
+      const w = wrap.offsetWidth;
+      const h = wrap.offsetHeight;
+      rect.setAttribute('width',  w - 2);
+      rect.setAttribute('height', h - 2);
+      // Perimetro para dasharray: 2*(w+h) - 8*rx  ≈  2*(w+h-4*11)
+      const perim = Math.round(2 * (w + h - 44));
+      // Traço = ~25% do perímetro, espaço = 75%
+      const dash  = Math.round(perim * 0.25);
+      const gap   = perim - dash;
+      rect.style.strokeDasharray  = dash + ' ' + gap;
+      rect.style.strokeDashoffset = '0';
+      // Reconfigura a animação com o perímetro real
+      let styleEl = document.getElementById('cofre-dash-style');
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'cofre-dash-style';
+        document.head.appendChild(styleEl);
+      }
+      styleEl.textContent = `@keyframes cofre-dash { 0% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -${perim}; } }`;
+    });
   }
 
   // ── Atualiza cards e barra ──
