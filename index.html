@@ -1285,6 +1285,10 @@
         </div>
       </div>
       <div class="ia-input-row">
+        <button id="btnMic" onclick="iaMicToggle()" title="Falar com a IA" style="
+          padding:9px 12px; background:var(--surface2); border:1px solid var(--border);
+          border-radius:10px; font-size:1.1rem; cursor:pointer; flex-shrink:0;
+          transition:all 0.2s; align-self:flex-end; color:var(--muted2);">🎤</button>
         <textarea id="iaMsgInput" rows="1" placeholder="Pergunte algo para a IA..."
                   onkeydown="if(event.key==='Enter'&&!event.shiftKey){iaEnviar();event.preventDefault();}"
                   oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
@@ -2525,6 +2529,78 @@
   }
 
   // Envia mensagem do usuário
+  // ── Microfone (Web Speech API) ──
+  let _micRec = null;
+  let _micAtivo = false;
+
+  function iaMicToggle() {
+    const btn = document.getElementById('btnMic');
+    const inp = document.getElementById('iaMsgInput');
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      iaAddMsg('⚠️ Seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge.', 'ia');
+      return;
+    }
+
+    if (_micAtivo) {
+      // Para a gravação
+      _micRec && _micRec.stop();
+      return;
+    }
+
+    _micRec = new SpeechRecognition();
+    _micRec.lang = 'pt-BR';
+    _micRec.continuous = false;
+    _micRec.interimResults = true;
+
+    _micRec.onstart = () => {
+      _micAtivo = true;
+      btn.style.background = '#ef4444';
+      btn.style.borderColor = '#ef4444';
+      btn.style.color = '#fff';
+      btn.innerText = '🔴';
+      btn.title = 'Clique para parar';
+      inp.placeholder = '🎤 Ouvindo...';
+    };
+
+    _micRec.onresult = (e) => {
+      let transcript = '';
+      for (let i = 0; i < e.results.length; i++) {
+        transcript += e.results[i][0].transcript;
+      }
+      inp.value = transcript;
+      inp.style.height = 'auto';
+      inp.style.height = inp.scrollHeight + 'px';
+    };
+
+    _micRec.onend = () => {
+      _micAtivo = false;
+      btn.style.background = 'var(--surface2)';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--muted2)';
+      btn.innerText = '🎤';
+      btn.title = 'Falar com a IA';
+      inp.placeholder = 'Pergunte algo para a IA...';
+      // Se captou algo, envia automaticamente
+      if (inp.value.trim()) iaEnviar();
+    };
+
+    _micRec.onerror = (e) => {
+      _micAtivo = false;
+      btn.style.background = 'var(--surface2)';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--muted2)';
+      btn.innerText = '🎤';
+      inp.placeholder = 'Pergunte algo para a IA...';
+      if (e.error === 'not-allowed') {
+        iaAddMsg('❌ Permissão de microfone negada. Clique no cadeado na barra do navegador e permita o microfone.', 'ia');
+      }
+    };
+
+    _micRec.start();
+  }
+
   async function iaEnviar() {
     const inp = document.getElementById('iaMsgInput');
     const txt = inp.value.trim();
