@@ -7,6 +7,50 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ── Cofre de Metas — borda giratória estilo GitHub ── */
+  @keyframes cofre-spin {
+    0%   { --cofre-angle: 0deg; }
+    100% { --cofre-angle: 360deg; }
+  }
+  @property --cofre-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  .cofre-card {
+    position: relative;
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #1a0533, #2d1049);
+    animation: cofre-spin 3s linear infinite;
+    z-index: 0;
+  }
+  .cofre-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 14px;
+    background: conic-gradient(
+      from var(--cofre-angle),
+      transparent 0%,
+      transparent 30%,
+      #a855f7 45%,
+      #e879f9 50%,
+      #a855f7 55%,
+      transparent 70%,
+      transparent 100%
+    );
+    z-index: -1;
+  }
+  .cofre-card::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1a0533, #2d1049);
+    z-index: -1;
+  }
+
   /* ── Variáveis de tema (padrão: escuro) ── */
   :root {
     --bg:        #0f172a;
@@ -786,7 +830,7 @@
         <div class="label">Depósitos</div>
         <div class="value" id="cDepositos">—</div>
       </div>
-      <div class="card" style="background:linear-gradient(135deg,#1a0533,#2d1049);border-color:#4a1d7a;">
+      <div class="cofre-card">
         <div class="label" style="color:#c084fc;">🏦 Cofre de Metas</div>
         <div class="value" id="cCofre" style="color:#a855f7;">R$ 0,00</div>
         <div style="font-size:0.7rem;color:#9f6fc4;margin-top:4px;" id="cCofreFases">0 fase(s) concluída(s)</div>
