@@ -1371,8 +1371,9 @@
       if (!raw) return { ...USUARIOS_PADRAO };
       const parsed = JSON.parse(raw);
       if (typeof parsed === 'object' && parsed !== null && Object.keys(parsed).length > 0) {
-        // parsed pode ter usuarios customizados; USUARIOS_PADRAO sempre prevalece
-        return { ...parsed, ...USUARIOS_PADRAO };
+        // Garante que usuarios padrao existem, mas sem sobrescrever customizações salvas
+        const merged = { ...USUARIOS_PADRAO, ...parsed };
+        return merged;
       }
       return { ...USUARIOS_PADRAO };
     } catch(e) {
@@ -1470,9 +1471,24 @@
 
   // Inicialização: decide qual tela mostrar
   (function() {
-    // Força atualização dos usuarios padrao no localStorage sempre que carregar
-    localStorage.removeItem('desafio_usuarios_v1');
-    USUARIOS = { ...USUARIOS_PADRAO };
+    // Garante que usuarios padrao existem no localStorage sem apagar customizações
+    const _rawU = localStorage.getItem(CHAVE_USERS);
+    if (!_rawU) {
+      localStorage.setItem(CHAVE_USERS, JSON.stringify(USUARIOS_PADRAO));
+    } else {
+      try {
+        const _parsed = JSON.parse(_rawU);
+        // Adiciona apenas usuarios padrao que não existem ainda (sem sobrescrever)
+        let _changed = false;
+        Object.entries(USUARIOS_PADRAO).forEach(([u, p]) => {
+          if (!(_parsed[u])) { _parsed[u] = p; _changed = true; }
+        });
+        if (_changed) localStorage.setItem(CHAVE_USERS, JSON.stringify(_parsed));
+      } catch(e) {
+        localStorage.setItem(CHAVE_USERS, JSON.stringify(USUARIOS_PADRAO));
+      }
+    }
+    USUARIOS = carregarUsuarios();
 
     const t = localStorage.getItem('tema_desafio') || 'escuro';
     document.body.className = t && t !== 'escuro' ? 'tema-' + t : '';
