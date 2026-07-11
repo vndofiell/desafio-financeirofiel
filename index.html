@@ -2037,61 +2037,71 @@
   // ══════════════════════════════════════════════
   // CALCULADORA
   // ══════════════════════════════════════════════
-  let _cDisplay  = '0';      // número atual no display
-  let _cPrimeiro = null;     // primeiro operando
+  // _cDigits guarda apenas os dígitos brutos (centavos) do número em edição
+  let _cDigits   = '0';      // string de dígitos sem formatação
+  let _cPrimeiro = null;     // primeiro operando (número float)
   let _cOp       = null;     // operador pendente
   let _cNovo     = false;    // próximo dígito começa novo número
   let _cHist     = [];       // histórico
 
-  function _cFmt(n) {
-    // Formata número para pt-BR com até 10 casas decimais, removendo zeros finais
-    if (!isFinite(n)) return 'Erro';
-    const s = parseFloat(n.toFixed(10)).toLocaleString('pt-BR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 10
+  // Formata dígitos brutos como moeda pt-BR (centavos)
+  function _cFmtDigits(digits) {
+    const cents = parseInt(digits || '0', 10);
+    return (cents / 100).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     });
-    return s;
+  }
+
+  // Formata um float para exibição pt-BR (resultado de operação)
+  function _cFmtNum(n) {
+    if (!isFinite(n)) return 'Erro';
+    // Se o resultado tem decimais, mostra com 2 casas; se inteiro, mostra sem
+    const hasDec = (n % 1 !== 0);
+    return n.toLocaleString('pt-BR', {
+      minimumFractionDigits: hasDec ? 2 : 0,
+      maximumFractionDigits: 2
+    });
   }
 
   function _cAtualizar() {
-    document.getElementById('calcDisplay').innerText = _cDisplay;
+    const el = document.getElementById('calcDisplay');
+    if (el) el.innerText = _cNovo && _cPrimeiro !== null
+      ? _cFmtDigits(_cDigits)   // novo número após operador
+      : _cFmtDigits(_cDigits);  // número em edição
   }
 
   function calcNum(d) {
-    if (_cNovo) { _cDisplay = d === '0' ? '0' : d; _cNovo = false; }
+    if (_cNovo) { _cDigits = d === '0' ? '0' : d; _cNovo = false; }
     else {
-      if (_cDisplay === '0' && d !== ',') _cDisplay = d;
-      else if (_cDisplay.length < 15) _cDisplay += d;
+      if (_cDigits === '0') _cDigits = d;
+      else if (_cDigits.length < 12) _cDigits += d;
     }
     _cAtualizar();
   }
 
-  function calcVirgula() {
-    if (_cNovo) { _cDisplay = '0,'; _cNovo = false; _cAtualizar(); return; }
-    if (!_cDisplay.includes(',')) _cDisplay += ',';
-    _cAtualizar();
-  }
+  // Botão vírgula: na calculadora de centavos não faz nada (a vírgula já está sempre lá)
+  function calcVirgula() { /* já incluída automaticamente */ }
 
   function _cValor() {
-    return parseFloat(_cDisplay.replace(/\./g, '').replace(',', '.'));
+    return parseInt(_cDigits || '0', 10) / 100;
   }
 
   function calcOp(op) {
-    // Se já há operador pendente, resolve antes
     if (_cOp && !_cNovo) {
       const r = _cResolver(_cPrimeiro, _cOp, _cValor());
-      _cDisplay = _cFmt(r);
       _cPrimeiro = r;
+      // Converte resultado de volta para dígitos para exibir
+      _cDigits = String(Math.round(Math.abs(r) * 100));
     } else {
       _cPrimeiro = _cValor();
     }
     _cOp   = op;
     _cNovo = true;
-    // Destaca operador ativo
     document.querySelectorAll('.cbtn-op').forEach(b => {
       b.classList.toggle('ativo', b.innerText === op);
     });
-    document.getElementById('calcExpr').innerText = _cFmt(_cPrimeiro) + ' ' + op;
+    document.getElementById('calcExpr').innerText = _cFmtNum(_cPrimeiro) + ' ' + op;
     _cAtualizar();
   }
 
@@ -2107,40 +2117,43 @@
     if (_cOp === null) return;
     const b   = _cValor();
     const res = _cResolver(_cPrimeiro, _cOp, b);
-    const expr = _cFmt(_cPrimeiro) + ' ' + _cOp + ' ' + _cFmt(b) + ' = ' + _cFmt(res);
-    // Histórico
+    const expr = _cFmtNum(_cPrimeiro) + ' ' + _cOp + ' ' + _cFmtNum(b) + ' = ' + _cFmtNum(res);
     _cHist.unshift(expr);
     if (_cHist.length > 20) _cHist.pop();
     _cRenderHist();
     document.getElementById('calcExpr').innerText = expr;
-    _cDisplay  = _cFmt(res);
+    // Exibe resultado formatado
+    _cDigits   = String(Math.round(Math.abs(res) * 100));
+    document.getElementById('calcDisplay').innerText =
+      (res < 0 ? '-' : '') + _cFmtDigits(_cDigits);
     _cPrimeiro = null;
     _cOp       = null;
     _cNovo     = true;
     document.querySelectorAll('.cbtn-op').forEach(b => b.classList.remove('ativo'));
-    _cAtualizar();
   }
 
   function calcAc() {
-    _cDisplay  = '0';
+    _cDigits   = '0';
     _cPrimeiro = null;
     _cOp       = null;
     _cNovo     = false;
     document.getElementById('calcExpr').innerText = ' ';
     document.querySelectorAll('.cbtn-op').forEach(b => b.classList.remove('ativo'));
-    _cAtualizar();
+    document.getElementById('calcDisplay').innerText = '0,00';
   }
 
   function calcSign() {
     const v = _cValor();
-    _cDisplay = _cFmt(-v);
-    _cAtualizar();
+    const neg = -v;
+    _cDigits = String(Math.round(Math.abs(neg) * 100));
+    document.getElementById('calcDisplay').innerText =
+      (neg < 0 ? '-' : '') + _cFmtDigits(_cDigits);
   }
 
   function calcPct() {
-    const v = _cValor();
-    _cDisplay = _cFmt(v / 100);
-    _cAtualizar();
+    const v = _cValor() / 100;
+    _cDigits = String(Math.round(Math.abs(v) * 100));
+    document.getElementById('calcDisplay').innerText = _cFmtDigits(_cDigits);
   }
 
   function _cRenderHist() {
@@ -2161,7 +2174,7 @@
   document.addEventListener('keydown', function(e) {
     if (!document.getElementById('tabCalculadora').classList.contains('active')) return;
     if (e.key >= '0' && e.key <= '9') { calcNum(e.key); e.preventDefault(); }
-    else if (e.key === ',' || e.key === '.') { calcVirgula(); e.preventDefault(); }
+    else if (e.key === ',' || e.key === '.') { /* virgula automatica */ e.preventDefault(); }
     else if (e.key === '+') { calcOp('+'); e.preventDefault(); }
     else if (e.key === '-') { calcOp('-'); e.preventDefault(); }
     else if (e.key === '*') { calcOp('×'); e.preventDefault(); }
@@ -2169,8 +2182,8 @@
     else if (e.key === 'Enter' || e.key === '=') { calcIgual(); e.preventDefault(); }
     else if (e.key === 'Escape') { calcAc(); e.preventDefault(); }
     else if (e.key === 'Backspace') {
-      if (_cDisplay.length > 1) _cDisplay = _cDisplay.slice(0, -1);
-      else _cDisplay = '0';
+      if (_cDigits.length > 1) _cDigits = _cDigits.slice(0, -1);
+      else _cDigits = '0';
       _cAtualizar(); e.preventDefault();
     }
   });
