@@ -1616,81 +1616,27 @@
       return;
     }
 
-    // Verifica se o valor não ultrapassa o que falta
     let somaAtual = 0;
     marcados.forEach(i => somaAtual += valorReal(i));
     const falta = getObjetivo() - somaAtual;
-    if (val > falta) {
+
+    if (valores.every((_, i) => marcados.has(i)) && somaAtual >= getObjetivo() - 0.005) {
+      fb.className = 'dep-feedback erro';
+      fb.innerText = '🎉 Desafio concluído! Todos os quadros marcados.';
+      return;
+    }
+
+    if (val > falta + 0.005) {
       fb.className = 'dep-feedback erro';
       fb.innerText = `❌ Valor maior que o faltante (${fmt(falta)}).`;
       return;
     }
 
-    // Se não há quadros disponíveis, expande automaticamente
-    let semDisp = valores.every((_, i) => marcados.has(i));
-    if (semDisp) {
-      if (somaAtual < getObjetivo() - 0.005) {
-        expandirSeNecessario();
-      } else {
-        fb.className = 'dep-feedback erro';
-        fb.innerText = '🎉 Desafio concluído! Todos os quadros marcados.';
-        return;
-      }
-    }
-
-    // Quadrados disponíveis (não marcados), do menor para o maior
-    const disponiveis = valores
-      .map((v, i) => ({ v: valorReal(i), i }))
-      .filter(x => !marcados.has(x.i))
-      .sort((a, b) => a.v - b.v);
-
-    if (disponiveis.length === 0) {
-      fb.className = 'dep-feedback erro';
-      fb.innerText = '⚠️ Não foi possível expandir os quadros.';
-      return;
-    }
-
-    let restante = Math.round(val * 100) / 100;
-    let qtd = 0;
-
-    // Passo 1: marca quadrados cujo valor cabe EXATAMENTE no restante (sem ultrapassar)
-    for (const item of disponiveis) {
-      if (restante <= 0) break;
-      if (item.v <= restante) {
-        marcados.add(item.i);
-        restante = Math.round((restante - item.v) * 100) / 100;
-        qtd++;
-      }
-    }
-
-    // Passo 2: se ainda sobrou troco, pega o próximo quadro disponível,
-    // DIVIDE em dois: marca com o valor do troco + cria novo quadro desmarcado com o resto
-    if (restante > 0) {
-      const proximo = disponiveis.find(x => !marcados.has(x.i));
-      if (proximo) {
-        const valorOriginal = valorReal(proximo.i);
-        const troco = Math.round((valorOriginal - restante) * 100) / 100;
-        // Reduz o quadro existente para o valor do troco
-        ajustes[proximo.i] = restante;
-        marcados.add(proximo.i);
-        qtd++;
-        // Cria um novo quadro extra desmarcado com o valor restante (troco)
-        if (troco > 0) {
-          extras.push(troco);
-          valores = [...valoresBase, ...extras];
-        }
-      }
-    }
-
-    salvar();
-    renderGrid();
+    const qtd = marcarQuadrosPorValor(val);
     document.getElementById('inDeposito').value = '';
-
-    // Integração com Poupança — registra o depósito como entrada
     registrarMovPoupanca('entrada', val, `Desafio — depósito rápido ${fmt(val)}`);
-
     fb.className = 'dep-feedback';
-    fb.innerText = `✅ ${qtd} quadro(s) marcado(s) · ${fmt(val)} aplicado(s) com exatidão!`;
+    fb.innerText = `✅ ${qtd} quadro(s) marcado(s) · ${fmt(val)} aplicado(s)!`;
   }
 
   // ══════════════════════════════════════════════
@@ -1711,6 +1657,56 @@
     document.getElementById('btnSaida').className   = 'tipo-btn' + (tipo === 'saida'   ? ' saida-sel'   : '');
   }
 
+  // ── Marca quadros no desafio por valor (usado pelo Depósito Rápido e pela Poupança Entrada) ──
+  function marcarQuadrosPorValor(val) {
+    // Expande se todos já estão marcados e ainda falta
+    let somaAtual = 0;
+    marcados.forEach(i => somaAtual += valorReal(i));
+    const falta = getObjetivo() - somaAtual;
+    if (val > falta + 0.005) return 0; // valor maior que o que falta — não aplica
+
+    let semDisp = valores.every((_, i) => marcados.has(i));
+    if (semDisp && somaAtual < getObjetivo() - 0.005) expandirSeNecessario();
+
+    const disponiveis = valores
+      .map((v, i) => ({ v: valorReal(i), i }))
+      .filter(x => !marcados.has(x.i))
+      .sort((a, b) => a.v - b.v);
+
+    if (disponiveis.length === 0) return 0;
+
+    let restante = Math.round(val * 100) / 100;
+    let qtd = 0;
+
+    for (const item of disponiveis) {
+      if (restante <= 0) break;
+      if (item.v <= restante) {
+        marcados.add(item.i);
+        restante = Math.round((restante - item.v) * 100) / 100;
+        qtd++;
+      }
+    }
+
+    if (restante > 0) {
+      const proximo = disponiveis.find(x => !marcados.has(x.i));
+      if (proximo) {
+        const valorOriginal = valorReal(proximo.i);
+        const troco = Math.round((valorOriginal - restante) * 100) / 100;
+        ajustes[proximo.i] = restante;
+        marcados.add(proximo.i);
+        qtd++;
+        if (troco > 0) {
+          extras.push(troco);
+          valores = [...valoresBase, ...extras];
+        }
+      }
+    }
+
+    salvar();
+    renderGrid();
+    return qtd;
+  }
+
   function adicionarMov() {
     const desc  = document.getElementById('movDesc').value.trim();
     const valor = parseFloat(document.getElementById('movValor').value.replace(/\./g, '').replace(',', '.'));
@@ -1719,6 +1715,16 @@
     if (!desc)         { alert('Digite uma descrição.'); return; }
     if (isNaN(valor) || valor <= 0) { alert('Digite um valor válido.'); return; }
     if (!data)         { alert('Selecione uma data.'); return; }
+
+    // Se for ENTRADA — marca quadros no desafio automaticamente
+    if (tipoSelecionado === 'entrada') {
+      const somaAtual = [...marcados].reduce((s, i) => s + valorReal(i), 0);
+      const falta = Math.round((getObjetivo() - somaAtual) * 100) / 100;
+      if (falta > 0.005) {
+        const aplicar = Math.min(valor, falta);
+        marcarQuadrosPorValor(aplicar);
+      }
+    }
 
     // Se for SAÍDA, desmarca quadros do desafio equivalentes ao valor
     if (tipoSelecionado === 'saida') {
