@@ -2509,9 +2509,7 @@ Seja direto, use emojis com moderação e formate com bullet points quando útil
   async function iaChatGroq(mensagemUsuario, isPlano) {
     const key = iaGetKey();
     if (!key) {
-      iaAddMsg('⚠️ Configure sua chave API Groq no painel esquerdo.
-
-Acesse <strong>console.groq.com</strong>, crie uma conta gratuita e gere sua API Key.', 'ia');
+      iaAddMsg('⚠️ Configure sua chave API Groq no painel esquerdo.\n\nAcesse console.groq.com, crie uma conta gratuita e gere sua API Key.', 'ia');
       return;
     }
 
