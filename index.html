@@ -1720,6 +1720,46 @@
     if (isNaN(valor) || valor <= 0) { alert('Digite um valor válido.'); return; }
     if (!data)         { alert('Selecione uma data.'); return; }
 
+    // Se for ENTRADA, marca quadros do desafio equivalentes ao valor (igual ao depósito rápido)
+    if (tipoSelecionado === 'entrada') {
+      let somaAtual = 0;
+      marcados.forEach(i => somaAtual += valorReal(i));
+      const falta = Math.round((getObjetivo() - somaAtual) * 100) / 100;
+
+      if (falta > 0.005) {
+        const valMarccar = Math.min(valor, falta);
+
+        // Expande se não há quadros disponíveis
+        if (valores.every((_, i) => marcados.has(i))) expandirSeNecessario();
+
+        const disponiveis = valores
+          .map((v, i) => ({ v: valorReal(i), i }))
+          .filter(x => !marcados.has(x.i))
+          .sort((a, b) => a.v - b.v);
+
+        let restante = Math.round(valMarccar * 100) / 100;
+        for (const item of disponiveis) {
+          if (restante <= 0) break;
+          if (item.v <= restante) {
+            marcados.add(item.i);
+            restante = Math.round((restante - item.v) * 100) / 100;
+          }
+        }
+        // Se sobrou troco, divide o próximo quadro
+        if (restante > 0.005) {
+          const proximo = disponiveis.find(x => !marcados.has(x.i));
+          if (proximo) {
+            const troco = Math.round((valorReal(proximo.i) - restante) * 100) / 100;
+            ajustes[proximo.i] = restante;
+            marcados.add(proximo.i);
+            if (troco > 0) { extras.push(troco); valores = [...valoresBase, ...extras]; }
+          }
+        }
+        salvar();
+        renderGrid();
+      }
+    }
+
     // Se for SAÍDA, desmarca quadros do desafio equivalentes ao valor
     if (tipoSelecionado === 'saida') {
       // Quadros marcados, do MAIOR para o MENOR (desmarca os maiores primeiro)
