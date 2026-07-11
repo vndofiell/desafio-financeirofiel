@@ -1802,7 +1802,7 @@
     localStorage.setItem(CHAVE_MOVS, JSON.stringify(movs));
 
     // Sincroniza com o Desafio — ignora movs geradas automaticamente pelo próprio Desafio
-    if (mov && !mov.desc.startsWith('Desafio —')) {
+    if (mov && !mov.desc.startsWith('Desafio ')) {
       if (mov.tipo === 'entrada') {
         // Entrada excluída → desmarca quadros equivalentes no desafio
         const marcadosList = [...marcados]
