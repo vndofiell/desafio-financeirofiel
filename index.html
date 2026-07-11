@@ -1220,7 +1220,8 @@
         <input type="password" id="ia_apikey" placeholder="gsk_..."
                onchange="iaSalvarKey()" />
         <button class="btn-salvar-key" onclick="iaSalvarKey()">Salvar chave</button>
-        <div style="font-size:0.65rem;color:var(--muted);margin-top:6px;line-height:1.5;">
+        <div id="ia_key_feedback" style="font-size:0.72rem;min-height:16px;margin-top:4px;"></div>
+        <div style="font-size:0.65rem;color:var(--muted);margin-top:4px;line-height:1.5;">
           Gratuito em <strong style="color:#a855f7;">console.groq.com</strong><br>
           Sua chave fica salva só no seu navegador.
         </div>
@@ -2407,9 +2408,18 @@
 
   function iaSalvarKey() {
     const k = document.getElementById('ia_apikey').value.trim();
-    if (k) { localStorage.setItem(IA_KEY_STORE, k); }
-    else    { localStorage.removeItem(IA_KEY_STORE); }
+    const fb = document.getElementById('ia_key_feedback');
+    if (k) {
+      localStorage.setItem(IA_KEY_STORE, k);
+      fb.style.color = '#4ade80';
+      fb.innerText = '✅ Chave salva com sucesso!';
+    } else {
+      localStorage.removeItem(IA_KEY_STORE);
+      fb.style.color = '#f87171';
+      fb.innerText = '⚠️ Chave removida.';
+    }
     document.getElementById('ia_apikey').blur();
+    setTimeout(() => { fb.innerText = ''; }, 3000);
   }
 
   function iaGetKey() {
@@ -2524,7 +2534,7 @@ Seja direto, use emojis com moderação e formate com bullet points quando útil
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama3-8b-8192',
+          model: 'llama-3.3-70b-versatile',
           messages: [
             {
               role: 'system',
