@@ -7,48 +7,43 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── Cofre de Metas — borda giratória estilo GitHub ── */
+  /* ── Cofre de Metas — borda giratória (compatível com todos os navegadores) ── */
   @keyframes cofre-spin {
-    0%   { --cofre-angle: 0deg; }
-    100% { --cofre-angle: 360deg; }
-  }
-  @property --cofre-angle {
-    syntax: '<angle>';
-    inherits: false;
-    initial-value: 0deg;
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
   .cofre-card {
     position: relative;
     border-radius: 12px;
     padding: 14px 16px;
     background: linear-gradient(135deg, #1a0533, #2d1049);
-    animation: cofre-spin 3s linear infinite;
     z-index: 0;
+    overflow: hidden;
   }
-  .cofre-card::before {
-    content: '';
+  .cofre-card .cofre-glow {
     position: absolute;
-    inset: -2px;
-    border-radius: 14px;
+    inset: -60px;
     background: conic-gradient(
-      from var(--cofre-angle),
+      from 0deg,
       transparent 0%,
       transparent 30%,
-      #a855f7 45%,
+      #a855f7 44%,
       #e879f9 50%,
-      #a855f7 55%,
+      #a855f7 56%,
       transparent 70%,
       transparent 100%
     );
-    z-index: -1;
+    animation: cofre-spin 3s linear infinite;
+    z-index: 0;
   }
-  .cofre-card::after {
-    content: '';
-    position: absolute;
-    inset: 1px;
-    border-radius: 12px;
+  .cofre-card .cofre-inner {
+    position: relative;
+    z-index: 1;
     background: linear-gradient(135deg, #1a0533, #2d1049);
-    z-index: -1;
+    border-radius: 10px;
+    padding: 2px;
+    margin: -14px -16px;
+    padding: 14px 16px;
   }
 
   /* ── Variáveis de tema (padrão: escuro) ── */
@@ -840,17 +835,20 @@
         <div class="value" id="cDepositos">—</div>
       </div>
       <div class="cofre-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="label" style="color:#c084fc;">🏦 Cofre de Metas</div>
-          <button onclick="abrirModalCofre()" title="Editar cofre" style="
-            background:none;border:none;cursor:pointer;
-            color:#9f6fc4;font-size:0.9rem;padding:2px 4px;
-            border-radius:4px;transition:color 0.2s;line-height:1;"
-            onmouseover="this.style.color='#e879f9'"
-            onmouseout="this.style.color='#9f6fc4'">✏️</button>
+        <div class="cofre-glow"></div>
+        <div class="cofre-inner">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="label" style="color:#c084fc;">🏦 Cofre de Metas</div>
+            <button onclick="abrirModalCofre()" title="Editar cofre" style="
+              background:none;border:none;cursor:pointer;
+              color:#9f6fc4;font-size:0.9rem;padding:2px 4px;
+              border-radius:4px;transition:color 0.2s;line-height:1;"
+              onmouseover="this.style.color='#e879f9'"
+              onmouseout="this.style.color='#9f6fc4'">✏️</button>
+          </div>
+          <div class="value" id="cCofre" style="color:#a855f7;">R$ 0,00</div>
+          <div style="font-size:0.7rem;color:#9f6fc4;margin-top:4px;" id="cCofreFases">0 fase(s) concluída(s)</div>
         </div>
-        <div class="value" id="cCofre" style="color:#a855f7;">R$ 0,00</div>
-        <div style="font-size:0.7rem;color:#9f6fc4;margin-top:4px;" id="cCofreFases">0 fase(s) concluída(s)</div>
       </div>
 
       <!-- Progresso -->
