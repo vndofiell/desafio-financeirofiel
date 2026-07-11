@@ -1323,9 +1323,9 @@
       const raw = localStorage.getItem(CHAVE_USERS);
       if (!raw) return { ...USUARIOS_PADRAO };
       const parsed = JSON.parse(raw);
-      // Valida que é um objeto com pelo menos uma chave
       if (typeof parsed === 'object' && parsed !== null && Object.keys(parsed).length > 0) {
-        return parsed;
+        // Sempre garante que os usuarios padrao existem (inclusive novos adicionados)
+        return { ...USUARIOS_PADRAO, ...parsed };
       }
       return { ...USUARIOS_PADRAO };
     } catch(e) {
