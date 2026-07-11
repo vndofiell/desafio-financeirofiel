@@ -2312,64 +2312,62 @@
   })();
 
   // ══════════════════════════════════════════════
-  // CALCULADORA
+  // CALCULADORA — modo normal (5 = 5, não centavos)
   // ══════════════════════════════════════════════
-  // _cDigits guarda apenas os dígitos brutos (centavos) do número em edição
-  let _cDigits   = '0';      // string de dígitos sem formatação
-  let _cPrimeiro = null;     // primeiro operando (número float)
+  let _cStr      = '0';      // string do número sendo digitado (ex: "9,48")
+  let _cPrimeiro = null;     // primeiro operando (float)
   let _cOp       = null;     // operador pendente
-  let _cNovo     = false;    // próximo dígito começa novo número
+  let _cNovo     = false;    // próximo dígito começa número novo
   let _cHist     = [];       // histórico
 
-  // Formata dígitos brutos como moeda pt-BR (centavos)
-  function _cFmtDigits(digits) {
-    const cents = parseInt(digits || '0', 10);
-    return (cents / 100).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+  // Converte string de digitação (virgula = decimal) para float
+  function _cValor() {
+    return parseFloat((_cStr || '0').replace(',', '.')) || 0;
   }
 
-  // Formata um float para exibição pt-BR (resultado de operação)
+  // Formata float para exibição pt-BR
   function _cFmtNum(n) {
     if (!isFinite(n)) return 'Erro';
-    // Se o resultado tem decimais, mostra com 2 casas; se inteiro, mostra sem
     const hasDec = (n % 1 !== 0);
     return n.toLocaleString('pt-BR', {
       minimumFractionDigits: hasDec ? 2 : 0,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 8
     });
   }
 
   function _cAtualizar() {
     const el = document.getElementById('calcDisplay');
-    if (el) el.innerText = _cNovo && _cPrimeiro !== null
-      ? _cFmtDigits(_cDigits)   // novo número após operador
-      : _cFmtDigits(_cDigits);  // número em edição
+    if (el) el.innerText = _cStr;
   }
 
   function calcNum(d) {
-    if (_cNovo) { _cDigits = d === '0' ? '0' : d; _cNovo = false; }
+    if (_cNovo) { _cStr = d; _cNovo = false; }
     else {
-      if (_cDigits === '0') _cDigits = d;
-      else if (_cDigits.length < 12) _cDigits += d;
+      if (_cStr === '0') _cStr = d;
+      else if (_cStr.length < 15) _cStr += d;
     }
     _cAtualizar();
   }
 
-  // Botão vírgula: na calculadora de centavos não faz nada (a vírgula já está sempre lá)
-  function calcVirgula() { /* já incluída automaticamente */ }
+  function calcVirgula() {
+    if (_cNovo) { _cStr = '0,'; _cNovo = false; }
+    else if (!_cStr.includes(',')) _cStr += ',';
+    _cAtualizar();
+  }
 
-  function _cValor() {
-    return parseInt(_cDigits || '0', 10) / 100;
+  function _cResolver(a, op, b) {
+    if (op === '+') return a + b;
+    if (op === '-') return a - b;
+    if (op === '×') return a * b;
+    if (op === '÷') return b === 0 ? NaN : a / b;
+    return b;
   }
 
   function calcOp(op) {
     if (_cOp && !_cNovo) {
       const r = _cResolver(_cPrimeiro, _cOp, _cValor());
       _cPrimeiro = r;
-      // Converte resultado de volta para dígitos para exibir
-      _cDigits = String(Math.round(Math.abs(r) * 100));
+      _cStr = _cFmtNum(r);
     } else {
       _cPrimeiro = _cValor();
     }
@@ -2382,14 +2380,6 @@
     _cAtualizar();
   }
 
-  function _cResolver(a, op, b) {
-    if (op === '+') return a + b;
-    if (op === '-') return a - b;
-    if (op === '×') return a * b;
-    if (op === '÷') return b === 0 ? NaN : a / b;
-    return b;
-  }
-
   function calcIgual() {
     if (_cOp === null) return;
     const b   = _cValor();
@@ -2399,10 +2389,8 @@
     if (_cHist.length > 20) _cHist.pop();
     _cRenderHist();
     document.getElementById('calcExpr').innerText = expr;
-    // Exibe resultado formatado
-    _cDigits   = String(Math.round(Math.abs(res) * 100));
-    document.getElementById('calcDisplay').innerText =
-      (res < 0 ? '-' : '') + _cFmtDigits(_cDigits);
+    _cStr      = _cFmtNum(res);
+    document.getElementById('calcDisplay').innerText = _cStr;
     _cPrimeiro = null;
     _cOp       = null;
     _cNovo     = true;
@@ -2410,27 +2398,25 @@
   }
 
   function calcAc() {
-    _cDigits   = '0';
+    _cStr      = '0';
     _cPrimeiro = null;
     _cOp       = null;
     _cNovo     = false;
-    document.getElementById('calcExpr').innerText = ' ';
+    document.getElementById('calcExpr').innerText = ' ';
     document.querySelectorAll('.cbtn-op').forEach(b => b.classList.remove('ativo'));
-    document.getElementById('calcDisplay').innerText = '0,00';
+    document.getElementById('calcDisplay').innerText = '0';
   }
 
   function calcSign() {
-    const v = _cValor();
-    const neg = -v;
-    _cDigits = String(Math.round(Math.abs(neg) * 100));
-    document.getElementById('calcDisplay').innerText =
-      (neg < 0 ? '-' : '') + _cFmtDigits(_cDigits);
+    const v = -_cValor();
+    _cStr = _cFmtNum(v);
+    document.getElementById('calcDisplay').innerText = _cStr;
   }
 
   function calcPct() {
     const v = _cValor() / 100;
-    _cDigits = String(Math.round(Math.abs(v) * 100));
-    document.getElementById('calcDisplay').innerText = _cFmtDigits(_cDigits);
+    _cStr = _cFmtNum(v);
+    document.getElementById('calcDisplay').innerText = _cStr;
   }
 
   function _cRenderHist() {
