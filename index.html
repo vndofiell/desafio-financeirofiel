@@ -14,7 +14,7 @@
   }
   .cofre-wrap {
     position: relative;
-    border-radius: 12px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #1a0533, #2d1049);
     border: 1px solid #4a1d7a;
   }
@@ -24,7 +24,7 @@
     width: 100%; height: 100%;
     pointer-events: none;
     overflow: visible;
-    border-radius: 12px;
+    border-radius: 10px;
   }
   .cofre-wrap > svg.cofre-border rect {
     fill: none;
@@ -36,10 +36,12 @@
   }
   .cofre-card {
     position: relative;
-    border-radius: 10px;
-    padding: 14px 16px;
+    border-radius: 8px;
+    padding: 7px 12px;
     background: transparent;
   }
+  .cofre-card .label { font-size: 0.65rem; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+  .cofre-card .value { font-size: 1.05rem; font-weight: 700; color: #a855f7; }
 
   /* ── Variáveis de tema (padrão: escuro) ── */
   :root {
@@ -510,33 +512,33 @@
 
   /* ── Painel esquerdo (sidebar de stats) ── */
   .sidebar {
-    width: 260px;
+    width: 230px;
     flex-shrink: 0;
     background: var(--surface);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    padding: 20px 16px;
-    gap: 14px;
-    overflow-y: auto;
+    padding: 10px 12px;
+    gap: 6px;
+    overflow-y: hidden;
     transition: background 0.3s;
   }
   .card {
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 10px;
+    padding: 7px 12px;
     transition: background 0.3s;
   }
   .card .label {
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 6px;
+    margin-bottom: 2px;
   }
   .card .value {
-    font-size: 1.35rem;
+    font-size: 1.05rem;
     font-weight: 700;
   }
   .card.azul   .value { color: #38bdf8; }
@@ -548,14 +550,14 @@
   .prog-label {
     display: flex;
     justify-content: space-between;
-    font-size: 0.78rem;
+    font-size: 0.68rem;
     color: var(--muted);
-    margin-bottom: 6px;
+    margin-bottom: 3px;
   }
   .bar-bg {
     background: var(--border);
     border-radius: 999px;
-    height: 14px;
+    height: 9px;
     overflow: hidden;
   }
   .bar-fill {
@@ -567,8 +569,8 @@
   }
   .bar-pct {
     text-align: center;
-    margin-top: 6px;
-    font-size: 0.88rem;
+    margin-top: 3px;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #4ade80;
   }
@@ -577,49 +579,49 @@
   .deposito-rapido {
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 10px;
+    padding: 8px 10px;
   }
   .deposito-rapido .label {
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
   }
   .deposito-rapido .input-row {
     display: flex;
-    gap: 6px;
+    gap: 5px;
   }
   .deposito-rapido input {
     flex: 1;
-    padding: 8px 10px;
+    padding: 5px 8px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 7px;
+    border-radius: 6px;
     color: var(--text);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     outline: none;
     transition: border-color 0.2s;
     min-width: 0;
   }
   .deposito-rapido input:focus { border-color: var(--accent); }
   .deposito-rapido .btn-dep {
-    padding: 8px 12px;
+    padding: 5px 10px;
     background: var(--accent);
     color: var(--accent-dk);
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     border: none;
-    border-radius: 7px;
+    border-radius: 6px;
     cursor: pointer;
     white-space: nowrap;
   }
   .deposito-rapido .btn-dep:hover { opacity: 0.85; }
   .dep-feedback {
-    margin-top: 8px;
-    font-size: 0.78rem;
-    min-height: 16px;
+    margin-top: 4px;
+    font-size: 0.7rem;
+    min-height: 14px;
     color: #4ade80;
   }
   .dep-feedback.erro { color: #f87171; }
@@ -628,15 +630,15 @@
   .sidebar-btns {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     margin-top: auto;
   }
   .sb-btn {
     width: 100%;
-    padding: 10px;
+    padding: 7px;
     border: none;
-    border-radius: 8px;
-    font-size: 0.88rem;
+    border-radius: 7px;
+    font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
     transition: opacity 0.2s;
