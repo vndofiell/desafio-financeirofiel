@@ -706,6 +706,28 @@
   .item.checked.g50         { background:#831843; color:#fce7f3; border-color:#ec4899; }
   .item.checked.g100        { background:#4c1d95; color:#ede9fe; border-color:#8b5cf6; }
   .item.checked.gX          { background:#1e293b; color:#cbd5e1; border-color:#475569; }
+
+  /* ── Calculadora ── */
+  .cbtn {
+    padding: 0;
+    height: 64px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cbtn:hover  { filter: brightness(1.15); }
+  .cbtn:active { transform: scale(0.93); }
+  .cbtn-num { background: var(--surface2); color: var(--text); }
+  .cbtn-fn  { background: var(--border);   color: var(--text); }
+  .cbtn-op  { background: var(--accent);   color: var(--accent-dk); font-size: 1.5rem; }
+  .cbtn-eq  { background: var(--accent);   color: var(--accent-dk); font-size: 1.5rem; }
+  .cbtn-op.ativo { background: var(--text); color: var(--bg); }
 </style>
 </head>
 <body>
@@ -790,6 +812,7 @@
     <div class="tabs">
       <button class="tab-btn active" onclick="mudarAba('desafio')">🎯 Desafio</button>
       <button class="tab-btn"        onclick="mudarAba('poupanca')">🏦 Poupança</button>
+      <button class="tab-btn"        onclick="mudarAba('calculadora')">🧮 Calculadora</button>
       <button class="tab-btn"        onclick="mudarAba('config')">⚙️ Conta</button>
     </div>
     <span class="user" id="userLabel"></span>
@@ -986,6 +1009,69 @@
     </div>
   </div>
   </div><!-- fim tabConfig -->
+
+  <!-- ══ ABA: CALCULADORA ══ -->
+  <div class="tab-panel" id="tabCalculadora">
+  <div style="display:flex;flex:1;align-items:center;justify-content:center;background:var(--bg);overflow:auto;padding:20px;">
+    <div style="
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:20px;padding:24px;width:320px;
+      box-shadow:0 8px 32px rgba(0,0,0,.3);">
+
+      <!-- Display -->
+      <div style="
+        background:var(--surface2);border:1px solid var(--border);
+        border-radius:12px;padding:16px 18px;margin-bottom:16px;text-align:right;">
+        <div id="calcExpr" style="font-size:0.75rem;color:var(--muted);min-height:18px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">&nbsp;</div>
+        <div id="calcDisplay" style="font-size:2rem;font-weight:700;color:var(--text);letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">0</div>
+      </div>
+
+      <!-- Botões -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+
+        <!-- Linha 1 -->
+        <button class="cbtn cbtn-fn" onclick="calcAc()">AC</button>
+        <button class="cbtn cbtn-fn" onclick="calcSign()">+/-</button>
+        <button class="cbtn cbtn-fn" onclick="calcPct()">%</button>
+        <button class="cbtn cbtn-op" onclick="calcOp('÷')">÷</button>
+
+        <!-- Linha 2 -->
+        <button class="cbtn cbtn-num" onclick="calcNum('7')">7</button>
+        <button class="cbtn cbtn-num" onclick="calcNum('8')">8</button>
+        <button class="cbtn cbtn-num" onclick="calcNum('9')">9</button>
+        <button class="cbtn cbtn-op" onclick="calcOp('×')">×</button>
+
+        <!-- Linha 3 -->
+        <button class="cbtn cbtn-num" onclick="calcNum('4')">4</button>
+        <button class="cbtn cbtn-num" onclick="calcNum('5')">5</button>
+        <button class="cbtn cbtn-num" onclick="calcNum('6')">6</button>
+        <button class="cbtn cbtn-op" onclick="calcOp('-')">−</button>
+
+        <!-- Linha 4 -->
+        <button class="cbtn cbtn-num" onclick="calcNum('1')">1</button>
+        <button class="cbtn cbtn-num" onclick="calcNum('2')">2</button>
+        <button class="cbtn cbtn-num" onclick="calcNum('3')">3</button>
+        <button class="cbtn cbtn-op" onclick="calcOp('+')">+</button>
+
+        <!-- Linha 5 -->
+        <button class="cbtn cbtn-num" onclick="calcNum('0')" style="grid-column:span 2;text-align:left;padding-left:22px;">0</button>
+        <button class="cbtn cbtn-num" onclick="calcVirgula()">,</button>
+        <button class="cbtn cbtn-eq" onclick="calcIgual()">=</button>
+
+      </div>
+
+      <!-- Histórico -->
+      <div style="margin-top:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Histórico</span>
+          <button onclick="calcLimparHist()" style="background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;text-decoration:underline;">limpar</button>
+        </div>
+        <div id="calcHist" style="max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;"></div>
+      </div>
+
+    </div>
+  </div>
+  </div><!-- fim tabCalculadora -->
 
   <!-- ══ MODAL: ALTERAR OBJETIVO ══ -->
   <div id="modalObjetivo" style="
@@ -1947,6 +2033,147 @@
     const t = localStorage.getItem('tema_desafio') || 'escuro';
     document.body.className = t && t !== 'escuro' ? 'tema-' + t : '';
   })();
+
+  // ══════════════════════════════════════════════
+  // CALCULADORA
+  // ══════════════════════════════════════════════
+  let _cDisplay  = '0';      // número atual no display
+  let _cPrimeiro = null;     // primeiro operando
+  let _cOp       = null;     // operador pendente
+  let _cNovo     = false;    // próximo dígito começa novo número
+  let _cHist     = [];       // histórico
+
+  function _cFmt(n) {
+    // Formata número para pt-BR com até 10 casas decimais, removendo zeros finais
+    if (!isFinite(n)) return 'Erro';
+    const s = parseFloat(n.toFixed(10)).toLocaleString('pt-BR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 10
+    });
+    return s;
+  }
+
+  function _cAtualizar() {
+    document.getElementById('calcDisplay').innerText = _cDisplay;
+  }
+
+  function calcNum(d) {
+    if (_cNovo) { _cDisplay = d === '0' ? '0' : d; _cNovo = false; }
+    else {
+      if (_cDisplay === '0' && d !== ',') _cDisplay = d;
+      else if (_cDisplay.length < 15) _cDisplay += d;
+    }
+    _cAtualizar();
+  }
+
+  function calcVirgula() {
+    if (_cNovo) { _cDisplay = '0,'; _cNovo = false; _cAtualizar(); return; }
+    if (!_cDisplay.includes(',')) _cDisplay += ',';
+    _cAtualizar();
+  }
+
+  function _cValor() {
+    return parseFloat(_cDisplay.replace(/\./g, '').replace(',', '.'));
+  }
+
+  function calcOp(op) {
+    // Se já há operador pendente, resolve antes
+    if (_cOp && !_cNovo) {
+      const r = _cResolver(_cPrimeiro, _cOp, _cValor());
+      _cDisplay = _cFmt(r);
+      _cPrimeiro = r;
+    } else {
+      _cPrimeiro = _cValor();
+    }
+    _cOp   = op;
+    _cNovo = true;
+    // Destaca operador ativo
+    document.querySelectorAll('.cbtn-op').forEach(b => {
+      b.classList.toggle('ativo', b.innerText === op);
+    });
+    document.getElementById('calcExpr').innerText = _cFmt(_cPrimeiro) + ' ' + op;
+    _cAtualizar();
+  }
+
+  function _cResolver(a, op, b) {
+    if (op === '+') return a + b;
+    if (op === '-') return a - b;
+    if (op === '×') return a * b;
+    if (op === '÷') return b === 0 ? NaN : a / b;
+    return b;
+  }
+
+  function calcIgual() {
+    if (_cOp === null) return;
+    const b   = _cValor();
+    const res = _cResolver(_cPrimeiro, _cOp, b);
+    const expr = _cFmt(_cPrimeiro) + ' ' + _cOp + ' ' + _cFmt(b) + ' = ' + _cFmt(res);
+    // Histórico
+    _cHist.unshift(expr);
+    if (_cHist.length > 20) _cHist.pop();
+    _cRenderHist();
+    document.getElementById('calcExpr').innerText = expr;
+    _cDisplay  = _cFmt(res);
+    _cPrimeiro = null;
+    _cOp       = null;
+    _cNovo     = true;
+    document.querySelectorAll('.cbtn-op').forEach(b => b.classList.remove('ativo'));
+    _cAtualizar();
+  }
+
+  function calcAc() {
+    _cDisplay  = '0';
+    _cPrimeiro = null;
+    _cOp       = null;
+    _cNovo     = false;
+    document.getElementById('calcExpr').innerText = ' ';
+    document.querySelectorAll('.cbtn-op').forEach(b => b.classList.remove('ativo'));
+    _cAtualizar();
+  }
+
+  function calcSign() {
+    const v = _cValor();
+    _cDisplay = _cFmt(-v);
+    _cAtualizar();
+  }
+
+  function calcPct() {
+    const v = _cValor();
+    _cDisplay = _cFmt(v / 100);
+    _cAtualizar();
+  }
+
+  function _cRenderHist() {
+    const el = document.getElementById('calcHist');
+    if (!el) return;
+    if (_cHist.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:0.78rem;text-align:center;padding:6px 0;">Nenhuma operação ainda.</div>'; return; }
+    el.innerHTML = _cHist.map(h =>
+      `<div style="font-size:0.78rem;color:var(--muted2);padding:3px 6px;background:var(--surface2);border-radius:6px;">${h}</div>`
+    ).join('');
+  }
+
+  function calcLimparHist() {
+    _cHist = [];
+    _cRenderHist();
+  }
+
+  // Suporte ao teclado na aba calculadora
+  document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('tabCalculadora').classList.contains('active')) return;
+    if (e.key >= '0' && e.key <= '9') { calcNum(e.key); e.preventDefault(); }
+    else if (e.key === ',' || e.key === '.') { calcVirgula(); e.preventDefault(); }
+    else if (e.key === '+') { calcOp('+'); e.preventDefault(); }
+    else if (e.key === '-') { calcOp('-'); e.preventDefault(); }
+    else if (e.key === '*') { calcOp('×'); e.preventDefault(); }
+    else if (e.key === '/') { calcOp('÷'); e.preventDefault(); }
+    else if (e.key === 'Enter' || e.key === '=') { calcIgual(); e.preventDefault(); }
+    else if (e.key === 'Escape') { calcAc(); e.preventDefault(); }
+    else if (e.key === 'Backspace') {
+      if (_cDisplay.length > 1) _cDisplay = _cDisplay.slice(0, -1);
+      else _cDisplay = '0';
+      _cAtualizar(); e.preventDefault();
+    }
+  });
 
   // ══════════════════════════════════════════════
   // SISTEMA DE FASES + COFRE DE METAS
