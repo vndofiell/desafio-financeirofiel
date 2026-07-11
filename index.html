@@ -1423,23 +1423,17 @@
     const t = localStorage.getItem('tema_desafio') || 'escuro';
     document.body.className = t && t !== 'escuro' ? 'tema-' + t : '';
 
-    // Se já tem objetivo salvo, pula a tela de configuração
+    // Se não tem objetivo salvo, usa 6000 como padrão e vai direto ao login
     let objSalvo = parseFloat(localStorage.getItem(CHAVE_OBJ_INICIAL));
-
-    // Compatibilidade: se não tem objetivo mas tem dados antigos de qualquer chave,
-    // usa 6000 como padrão e salva para não pedir novamente
     if (isNaN(objSalvo) || objSalvo < 1) {
-      const temDados = Object.keys(localStorage).some(k =>
-        k.startsWith('desafio_v4_') || k === 'poupanca_movs_v1' ||
-        k === 'desafio_lembrar_v1' || k === 'desafio_cofre_v1'
-      );
-      if (temDados) {
-        objSalvo = 6000;
-        localStorage.setItem(CHAVE_OBJ_INICIAL, objSalvo);
-      }
+      objSalvo = 6000;
+      localStorage.setItem(CHAVE_OBJ_INICIAL, objSalvo);
     }
 
-    if (!isNaN(objSalvo) && objSalvo >= 1) {
+    // Sempre pula a tela de configuração — ela só aparece ao criar um novo desafio manualmente
+    document.getElementById('configScreen').style.display = 'none';
+
+    if (true) {
       CHAVE_M = 'desafio_v4_marcados_' + objSalvo;
       CHAVE_A = 'desafio_v4_ajustes_'  + objSalvo;
       CHAVE_E = 'desafio_v4_extras_'   + objSalvo;
