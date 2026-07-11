@@ -2497,23 +2497,31 @@
     const porMes    = falta > 0 ? Math.ceil((falta / dias) * 30 * 100) / 100 : 0;
     const semanas   = Math.ceil(dias / 7);
 
-    const prompt = `Gere um plano financeiro DIRETO E OBJETIVO. Sem enrolação. Siga EXATAMENTE esta estrutura:
+    // Monta cronograma semana a semana já calculado em JS — IA só formata
+    let cronograma = '';
+    for (let s = 1; s <= semanas; s++) {
+      const metaSemana = s < semanas ? fmt(porSemana) : fmt(Math.round((falta - porSemana * (semanas - 1)) * 100) / 100);
+      cronograma += `  Semana ${s}: depositar ${metaSemana}\n`;
+    }
+
+    const prompt = `Você é um assistente financeiro. Apresente o plano abaixo SEM alterar nenhum número. Apenas formate e adicione 3 ações práticas no final.
 
 📊 SITUAÇÃO ATUAL
 - Acumulado: ${fmt(soma)} de ${fmt(obj)} (${pct}%)
 - Falta: ${fmt(falta)}
-- Prazo: ${dias} dias (${semanas} semanas)
+- Prazo: ${dias} dias úteis / ${semanas} semanas
 
-💰 PLANO DE DEPÓSITOS (use os valores exatos abaixo, não invente outros)
+💰 PLANO DE DEPÓSITOS
 - Por dia: ${fmt(porDia)}
 - Por semana: ${fmt(porSemana)}
 - Por mês: ${fmt(porMes)}
 
-📅 CRONOGRAMA SEMANAL (liste as ${semanas} semanas com meta de cada uma)
+📅 CRONOGRAMA SEMANAL
+${cronograma}
+⚡ 3 AÇÕES PRÁTICAS
+(escreva aqui 3 ações específicas e práticas para este caso)
 
-⚡ 3 AÇÕES PRÁTICAS (seja específico, sem genérico)
-
-REGRAS: Não explique o que é o cofre. Não sugira "usar o cofre" sem motivo. Não use frases motivacionais longas. Máximo 250 palavras no total.`;
+ATENÇÃO: NÃO recalcule nada. NÃO altere os valores acima. NÃO mencione o cofre. Máximo 200 palavras.`;
 
     iaAddMsg('✨ Gerando plano...', 'ia');
     await iaChatGroq(prompt, true);
