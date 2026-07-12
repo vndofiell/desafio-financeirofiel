@@ -683,48 +683,32 @@
     gap: 7px;
   }
   .item {
-    border: 1.5px solid #2d3f55;
-    border-radius: 10px;
+    border: 2px solid #334155;
+    border-radius: 8px;
     padding: 11px 4px;
     text-align: center;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 13px;
     transition: all 0.18s;
     user-select: none;
-    background: #141e2e;
-    color: #64748b;
-    position: relative;
   }
-  .item:hover { transform: translateY(-2px); border-color: #38bdf8; color: #e2e8f0; }
+  .item:hover { transform: translateY(-2px); filter: brightness(1.3); }
 
-  /* todos os grupos não marcados: visual neutro uniforme */
-  .g10, .g20, .g30, .g50, .g100, .gX {
-    background: #141e2e; color: #64748b; border-color: #2d3f55;
-  }
-  /* valor pequeno mais claro, valor grande mais destacado */
-  .g10  { color: #475569; }
-  .g20  { color: #4e6070; }
-  .g30  { color: #556070; }
-  .g50  { color: #5b6b7a; }
-  .g100 { color: #647080; border-color: #334a60; }
-  .gX   { color: #3d4f60; }
+  /* cores por grupo de valor */
+  .g10  { background:#1e293b; color:#93c5fd; border-color:#1d4ed8; }
+  .g20  { background:#1e293b; color:#6ee7b7; border-color:#047857; }
+  .g30  { background:#1e293b; color:#fde68a; border-color:#b45309; }
+  .g50  { background:#1e293b; color:#f9a8d4; border-color:#9d174d; }
+  .g100 { background:#1e293b; color:#d8b4fe; border-color:#6d28d9; }
+  .gX   { background:#1e293b; color:#94a3b8; border-color:#334155; }
 
-  /* marcados: fundo verde-escuro elegante, check visível */
-  .item.checked {
-    background: #0d2818 !important;
-    border-color: #22c55e !important;
-    color: #4ade80 !important;
-  }
-  .item.checked::after {
-    content: '✓';
-    position: absolute;
-    top: 2px; right: 4px;
-    font-size: 9px;
-    color: #22c55e;
-    font-weight: 900;
-    line-height: 1;
-  }
+  .item.checked.g10         { background:#1d4ed8; color:#cfe0ff; border-color:#3b82f6; }
+  .item.checked.g20         { background:#047857; color:#bbf7d0; border-color:#22c55e; }
+  .item.checked.g30         { background:#92400e; color:#fef3c7; border-color:#f59e0b; }
+  .item.checked.g50         { background:#831843; color:#fce7f3; border-color:#ec4899; }
+  .item.checked.g100        { background:#4c1d95; color:#ede9fe; border-color:#8b5cf6; }
+  .item.checked.gX          { background:#1e293b; color:#cbd5e1; border-color:#475569; }
 
   /* ── Aba IA ── */
   .ia-wrap {
@@ -747,59 +731,13 @@
   .ia-chat-box::-webkit-scrollbar { width: 4px; }
   .ia-chat-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
   .msg-ia, .msg-user {
-    max-width: 88%; padding: 8px 12px;
-    border-radius: 14px; font-size: 0.78rem; line-height: 1.5;
+    max-width: 80%; padding: 10px 14px;
+    border-radius: 14px; font-size: 0.88rem; line-height: 1.6;
     white-space: pre-wrap; word-break: break-word;
   }
   .msg-ia   { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; color: var(--text); border-radius: 4px 14px 14px 14px; }
   .msg-user { background: #7c3aed; color: #fff; align-self: flex-end; border-radius: 14px 4px 14px 14px; }
   .msg-typing { opacity: 0.5; font-style: italic; }
-
-  /* ── Plano IA formatado ── */
-  .ia-plano { display: flex; flex-direction: column; gap: 10px; white-space: normal; }
-  .ia-plano-secao {
-    border-radius: 10px; padding: 12px 14px;
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-  .ia-plano-secao.situacao { background: linear-gradient(135deg,#1e3a5f,#1e293b); border-color:#2563eb44; }
-  .ia-plano-secao.depositos { background: linear-gradient(135deg,#14532d,#1e293b); border-color:#22c55e44; }
-  .ia-plano-secao.cronograma { background: linear-gradient(135deg,#3b1f6b,#1e293b); border-color:#7c3aed44; }
-  .ia-plano-secao.acoes { background: linear-gradient(135deg,#7c2d12,#1e293b); border-color:#f9731644; }
-  .ia-plano-titulo {
-    font-size: 1rem; font-weight: 800; margin-bottom: 8px;
-    display: flex; align-items: center; gap: 6px; letter-spacing: 0.3px;
-  }
-  .ia-plano-secao.situacao  .ia-plano-titulo { color: #60a5fa; }
-  .ia-plano-secao.depositos .ia-plano-titulo { color: #4ade80; }
-  .ia-plano-secao.cronograma .ia-plano-titulo { color: #a78bfa; }
-  .ia-plano-secao.acoes .ia-plano-titulo { color: #fb923c; }
-  .ia-plano-linha {
-    font-size: 0.88rem; color: var(--text); padding: 3px 0;
-    display: flex; align-items: baseline; gap: 6px;
-  }
-  .ia-plano-linha strong { font-weight: 700; font-size: 1rem; }
-  .ia-plano-linha.destaque strong { font-size: 1.15rem; color: #4ade80; }
-  .ia-semana-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr));
-    gap: 5px; margin-top: 4px;
-  }
-  .ia-semana-item {
-    background: rgba(255,255,255,0.05); border-radius: 7px;
-    padding: 5px 8px; font-size: 0.78rem; color: var(--muted2);
-    border: 1px solid rgba(255,255,255,0.07);
-  }
-  .ia-semana-item span { display: block; font-weight: 700; color: #a78bfa; font-size: 0.85rem; }
-  .ia-acao-item {
-    display: flex; gap: 8px; align-items: flex-start;
-    padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 0.88rem;
-  }
-  .ia-acao-item:last-child { border-bottom: none; }
-  .ia-acao-num {
-    background: #f97316; color: #fff; font-weight: 800; font-size: 0.75rem;
-    border-radius: 50%; width: 20px; height: 20px; display: flex;
-    align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
-  }
   .ia-input-row {
     display: flex; gap: 8px; padding: 12px 16px;
     border-top: 1px solid var(--border);
@@ -921,7 +859,7 @@
 </div>
 
 <!-- ══ TELA DE LOGIN ══ -->
-<div id="loginScreen" style="display:flex;">
+<div id="loginScreen" style="display:none;">
   <div class="login-box">
     <h2>💰 Desafio</h2>
     <p>Faça login para acessar seu dashboard</p>
@@ -954,7 +892,7 @@
 </div>
 
 <!-- ══ TELA DO DASHBOARD ══ -->
-<div id="dashScreen">
+<div id="dashScreen" style="display:flex;">
 
   <!-- Topbar -->
   <div class="topbar">
@@ -1282,8 +1220,7 @@
         <input type="password" id="ia_apikey" placeholder="gsk_..."
                onchange="iaSalvarKey()" />
         <button class="btn-salvar-key" onclick="iaSalvarKey()">Salvar chave</button>
-        <div id="ia_key_feedback" style="font-size:0.72rem;min-height:16px;margin-top:4px;"></div>
-        <div style="font-size:0.65rem;color:var(--muted);margin-top:4px;line-height:1.5;">
+        <div style="font-size:0.65rem;color:var(--muted);margin-top:6px;line-height:1.5;">
           Gratuito em <strong style="color:#a855f7;">console.groq.com</strong><br>
           Sua chave fica salva só no seu navegador.
         </div>
@@ -1301,10 +1238,6 @@
         </div>
       </div>
       <div class="ia-input-row">
-        <button id="btnMic" onclick="iaMicToggle()" title="Falar com a IA" style="
-          padding:9px 12px; background:var(--surface2); border:1px solid var(--border);
-          border-radius:10px; font-size:1.1rem; cursor:pointer; flex-shrink:0;
-          transition:all 0.2s; align-self:flex-end; color:var(--muted2);">🎤</button>
         <textarea id="iaMsgInput" rows="1" placeholder="Pergunte algo para a IA..."
                   onkeydown="if(event.key==='Enter'&&!event.shiftKey){iaEnviar();event.preventDefault();}"
                   oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
@@ -1383,17 +1316,16 @@
 <script>
   // ── Credenciais — salvas no localStorage para permitir alteração ──
   const CHAVE_USERS = 'desafio_usuarios_v1';
-  const USUARIOS_PADRAO = { "admin": "1234", "vando": "vando123", "fiel": "fiel" };
+  const USUARIOS_PADRAO = { "admin": "1234", "vando": "vando123" };
 
   function carregarUsuarios() {
     try {
       const raw = localStorage.getItem(CHAVE_USERS);
       if (!raw) return { ...USUARIOS_PADRAO };
       const parsed = JSON.parse(raw);
+      // Valida que é um objeto com pelo menos uma chave
       if (typeof parsed === 'object' && parsed !== null && Object.keys(parsed).length > 0) {
-        // Garante que usuarios padrao existem, mas sem sobrescrever customizações salvas
-        const merged = { ...USUARIOS_PADRAO, ...parsed };
-        return merged;
+        return parsed;
       }
       return { ...USUARIOS_PADRAO };
     } catch(e) {
@@ -1489,69 +1421,30 @@
     valores = [...valoresBase, ...extras];
   }
 
-  // Inicialização: decide qual tela mostrar
+  // Inicialização
   (function() {
-    // Garante que usuarios padrao existem no localStorage sem apagar customizações
-    const _rawU = localStorage.getItem(CHAVE_USERS);
-    if (!_rawU) {
-      localStorage.setItem(CHAVE_USERS, JSON.stringify(USUARIOS_PADRAO));
-    } else {
-      try {
-        const _parsed = JSON.parse(_rawU);
-        // Adiciona apenas usuarios padrao que não existem ainda (sem sobrescrever)
-        let _changed = false;
-        Object.entries(USUARIOS_PADRAO).forEach(([u, p]) => {
-          if (!(_parsed[u])) { _parsed[u] = p; _changed = true; }
-        });
-        if (_changed) localStorage.setItem(CHAVE_USERS, JSON.stringify(_parsed));
-      } catch(e) {
-        localStorage.setItem(CHAVE_USERS, JSON.stringify(USUARIOS_PADRAO));
-      }
-    }
-    USUARIOS = carregarUsuarios();
-
     const t = localStorage.getItem('tema_desafio') || 'escuro';
     document.body.className = t && t !== 'escuro' ? 'tema-' + t : '';
 
-    // Se não tem objetivo salvo, usa 6000 como padrão e vai direto ao login
     let objSalvo = parseFloat(localStorage.getItem(CHAVE_OBJ_INICIAL));
     if (isNaN(objSalvo) || objSalvo < 1) {
       objSalvo = 6000;
       localStorage.setItem(CHAVE_OBJ_INICIAL, objSalvo);
     }
 
-    // Sempre pula a tela de configuração — ela só aparece ao criar um novo desafio manualmente
+    CHAVE_M = 'desafio_v4_marcados_' + objSalvo;
+    CHAVE_A = 'desafio_v4_ajustes_'  + objSalvo;
+    CHAVE_E = 'desafio_v4_extras_'   + objSalvo;
+    gerarQuadros(objSalvo);
     document.getElementById('configScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display  = 'none';
+    document.getElementById('dashScreen').style.display   = 'flex';
+    document.getElementById('userLabel').innerText = '👤 vando';
 
-    if (true) {
-      CHAVE_M = 'desafio_v4_marcados_' + objSalvo;
-      CHAVE_A = 'desafio_v4_ajustes_'  + objSalvo;
-      CHAVE_E = 'desafio_v4_extras_'   + objSalvo;
-      gerarQuadros(objSalvo);
-      document.getElementById('configScreen').style.display = 'none';
-      // Verifica "Lembrar de mim" — faz auto-login se não clicou Sair
-      const lembrado = localStorage.getItem('desafio_lembrar_v1');
-      const saiu     = sessionStorage.getItem('desafio_saiu');
-      if (lembrado && !saiu) {
-        try {
-          const {u, p} = JSON.parse(lembrado);
-          USUARIOS = carregarUsuarios();
-          if (USUARIOS[u] && USUARIOS[u] === p) {
-            _entrarDashboard(u, p);
-            return;
-          }
-        } catch(e) { localStorage.removeItem('desafio_lembrar_v1'); }
-      }
-      document.getElementById('loginScreen').style.display = 'flex';
-      // Pré-preenche o usuário se lembrar de mim estiver ativo
-      if (lembrado) {
-        try {
-          const {u} = JSON.parse(lembrado);
-          document.getElementById('inUser').value = u;
-          document.getElementById('chkLembrar').checked = true;
-        } catch(e) {}
-      }
-    }
+    try { extras   = JSON.parse(localStorage.getItem(CHAVE_E) || '[]'); } catch(e) { extras = []; }
+    try { marcados = new Set(JSON.parse(localStorage.getItem(CHAVE_M) || '[]')); } catch(e) { marcados = new Set(); }
+    try { ajustes  = JSON.parse(localStorage.getItem(CHAVE_A) || '{}'); } catch(e) { ajustes = {}; }
+    valores = [...valoresBase, ...extras];
   })();
 
   // ── Login ──
@@ -1604,7 +1497,7 @@
       if (sel) sel.value = temaSalvo;
   }
 
-  function sair() {
+ function sair() {
     // Marca na sessão que o usuário clicou Sair — impede auto-login no refresh
     sessionStorage.setItem('desafio_saiu', '1');
     document.getElementById('dashScreen').style.display  = 'none';
@@ -1626,14 +1519,13 @@
   }
 
   function resetarCredenciais() {
-    localStorage.removeItem(CHAVE_USERS);
-    USUARIOS = { ...USUARIOS_PADRAO };
-    const err = document.getElementById('loginErr');
-    err.style.color = '#4ade80';
-    err.innerText = '✅ Redefinido! Entre com: fiel / 12';
-    document.getElementById('inUser').value = 'fiel';
-    document.getElementById('inPass').value = '';
-    document.getElementById('inPass').focus();
+    if (confirm('Redefinir acesso para: admin/1234 e vando/vando123 ?')) {
+      localStorage.removeItem(CHAVE_USERS);
+      USUARIOS = { ...USUARIOS_PADRAO };
+      const err = document.getElementById('loginErr');
+      err.style.color = '#4ade80';
+      err.innerText = 'Credenciais redefinidas! Use admin / 1234';
+    }
   }
 
   // ── Helpers ──
@@ -2348,62 +2240,64 @@
   })();
 
   // ══════════════════════════════════════════════
-  // CALCULADORA — modo normal (5 = 5, não centavos)
+  // CALCULADORA
   // ══════════════════════════════════════════════
-  let _cStr      = '0';      // string do número sendo digitado (ex: "9,48")
-  let _cPrimeiro = null;     // primeiro operando (float)
+  // _cDigits guarda apenas os dígitos brutos (centavos) do número em edição
+  let _cDigits   = '0';      // string de dígitos sem formatação
+  let _cPrimeiro = null;     // primeiro operando (número float)
   let _cOp       = null;     // operador pendente
-  let _cNovo     = false;    // próximo dígito começa número novo
+  let _cNovo     = false;    // próximo dígito começa novo número
   let _cHist     = [];       // histórico
 
-  // Converte string de digitação (virgula = decimal) para float
-  function _cValor() {
-    return parseFloat((_cStr || '0').replace(',', '.')) || 0;
+  // Formata dígitos brutos como moeda pt-BR (centavos)
+  function _cFmtDigits(digits) {
+    const cents = parseInt(digits || '0', 10);
+    return (cents / 100).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 
-  // Formata float para exibição pt-BR
+  // Formata um float para exibição pt-BR (resultado de operação)
   function _cFmtNum(n) {
     if (!isFinite(n)) return 'Erro';
+    // Se o resultado tem decimais, mostra com 2 casas; se inteiro, mostra sem
     const hasDec = (n % 1 !== 0);
     return n.toLocaleString('pt-BR', {
       minimumFractionDigits: hasDec ? 2 : 0,
-      maximumFractionDigits: 8
+      maximumFractionDigits: 2
     });
   }
 
   function _cAtualizar() {
     const el = document.getElementById('calcDisplay');
-    if (el) el.innerText = _cStr;
+    if (el) el.innerText = _cNovo && _cPrimeiro !== null
+      ? _cFmtDigits(_cDigits)   // novo número após operador
+      : _cFmtDigits(_cDigits);  // número em edição
   }
 
   function calcNum(d) {
-    if (_cNovo) { _cStr = d; _cNovo = false; }
+    if (_cNovo) { _cDigits = d === '0' ? '0' : d; _cNovo = false; }
     else {
-      if (_cStr === '0') _cStr = d;
-      else if (_cStr.length < 15) _cStr += d;
+      if (_cDigits === '0') _cDigits = d;
+      else if (_cDigits.length < 12) _cDigits += d;
     }
     _cAtualizar();
   }
 
-  function calcVirgula() {
-    if (_cNovo) { _cStr = '0,'; _cNovo = false; }
-    else if (!_cStr.includes(',')) _cStr += ',';
-    _cAtualizar();
-  }
+  // Botão vírgula: na calculadora de centavos não faz nada (a vírgula já está sempre lá)
+  function calcVirgula() { /* já incluída automaticamente */ }
 
-  function _cResolver(a, op, b) {
-    if (op === '+') return a + b;
-    if (op === '-') return a - b;
-    if (op === '×') return a * b;
-    if (op === '÷') return b === 0 ? NaN : a / b;
-    return b;
+  function _cValor() {
+    return parseInt(_cDigits || '0', 10) / 100;
   }
 
   function calcOp(op) {
     if (_cOp && !_cNovo) {
       const r = _cResolver(_cPrimeiro, _cOp, _cValor());
       _cPrimeiro = r;
-      _cStr = _cFmtNum(r);
+      // Converte resultado de volta para dígitos para exibir
+      _cDigits = String(Math.round(Math.abs(r) * 100));
     } else {
       _cPrimeiro = _cValor();
     }
@@ -2416,6 +2310,14 @@
     _cAtualizar();
   }
 
+  function _cResolver(a, op, b) {
+    if (op === '+') return a + b;
+    if (op === '-') return a - b;
+    if (op === '×') return a * b;
+    if (op === '÷') return b === 0 ? NaN : a / b;
+    return b;
+  }
+
   function calcIgual() {
     if (_cOp === null) return;
     const b   = _cValor();
@@ -2425,8 +2327,10 @@
     if (_cHist.length > 20) _cHist.pop();
     _cRenderHist();
     document.getElementById('calcExpr').innerText = expr;
-    _cStr      = _cFmtNum(res);
-    document.getElementById('calcDisplay').innerText = _cStr;
+    // Exibe resultado formatado
+    _cDigits   = String(Math.round(Math.abs(res) * 100));
+    document.getElementById('calcDisplay').innerText =
+      (res < 0 ? '-' : '') + _cFmtDigits(_cDigits);
     _cPrimeiro = null;
     _cOp       = null;
     _cNovo     = true;
@@ -2434,25 +2338,27 @@
   }
 
   function calcAc() {
-    _cStr      = '0';
+    _cDigits   = '0';
     _cPrimeiro = null;
     _cOp       = null;
     _cNovo     = false;
-    document.getElementById('calcExpr').innerText = ' ';
+    document.getElementById('calcExpr').innerText = ' ';
     document.querySelectorAll('.cbtn-op').forEach(b => b.classList.remove('ativo'));
-    document.getElementById('calcDisplay').innerText = '0';
+    document.getElementById('calcDisplay').innerText = '0,00';
   }
 
   function calcSign() {
-    const v = -_cValor();
-    _cStr = _cFmtNum(v);
-    document.getElementById('calcDisplay').innerText = _cStr;
+    const v = _cValor();
+    const neg = -v;
+    _cDigits = String(Math.round(Math.abs(neg) * 100));
+    document.getElementById('calcDisplay').innerText =
+      (neg < 0 ? '-' : '') + _cFmtDigits(_cDigits);
   }
 
   function calcPct() {
     const v = _cValor() / 100;
-    _cStr = _cFmtNum(v);
-    document.getElementById('calcDisplay').innerText = _cStr;
+    _cDigits = String(Math.round(Math.abs(v) * 100));
+    document.getElementById('calcDisplay').innerText = _cFmtDigits(_cDigits);
   }
 
   function _cRenderHist() {
@@ -2476,18 +2382,9 @@
 
   function iaSalvarKey() {
     const k = document.getElementById('ia_apikey').value.trim();
-    const fb = document.getElementById('ia_key_feedback');
-    if (k) {
-      localStorage.setItem(IA_KEY_STORE, k);
-      fb.style.color = '#4ade80';
-      fb.innerText = '✅ Chave salva com sucesso!';
-    } else {
-      localStorage.removeItem(IA_KEY_STORE);
-      fb.style.color = '#f87171';
-      fb.innerText = '⚠️ Chave removida.';
-    }
+    if (k) { localStorage.setItem(IA_KEY_STORE, k); }
+    else    { localStorage.removeItem(IA_KEY_STORE); }
     document.getElementById('ia_apikey').blur();
-    setTimeout(() => { fb.innerText = ''; }, 3000);
   }
 
   function iaGetKey() {
@@ -2545,78 +2442,6 @@
   }
 
   // Envia mensagem do usuário
-  // ── Microfone (Web Speech API) ──
-  let _micRec = null;
-  let _micAtivo = false;
-
-  function iaMicToggle() {
-    const btn = document.getElementById('btnMic');
-    const inp = document.getElementById('iaMsgInput');
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      iaAddMsg('⚠️ Seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge.', 'ia');
-      return;
-    }
-
-    if (_micAtivo) {
-      // Para a gravação
-      _micRec && _micRec.stop();
-      return;
-    }
-
-    _micRec = new SpeechRecognition();
-    _micRec.lang = 'pt-BR';
-    _micRec.continuous = false;
-    _micRec.interimResults = true;
-
-    _micRec.onstart = () => {
-      _micAtivo = true;
-      btn.style.background = '#ef4444';
-      btn.style.borderColor = '#ef4444';
-      btn.style.color = '#fff';
-      btn.innerText = '🔴';
-      btn.title = 'Clique para parar';
-      inp.placeholder = '🎤 Ouvindo...';
-    };
-
-    _micRec.onresult = (e) => {
-      let transcript = '';
-      for (let i = 0; i < e.results.length; i++) {
-        transcript += e.results[i][0].transcript;
-      }
-      inp.value = transcript;
-      inp.style.height = 'auto';
-      inp.style.height = inp.scrollHeight + 'px';
-    };
-
-    _micRec.onend = () => {
-      _micAtivo = false;
-      btn.style.background = 'var(--surface2)';
-      btn.style.borderColor = 'var(--border)';
-      btn.style.color = 'var(--muted2)';
-      btn.innerText = '🎤';
-      btn.title = 'Falar com a IA';
-      inp.placeholder = 'Pergunte algo para a IA...';
-      // Se captou algo, envia automaticamente
-      if (inp.value.trim()) iaEnviar();
-    };
-
-    _micRec.onerror = (e) => {
-      _micAtivo = false;
-      btn.style.background = 'var(--surface2)';
-      btn.style.borderColor = 'var(--border)';
-      btn.style.color = 'var(--muted2)';
-      btn.innerText = '🎤';
-      inp.placeholder = 'Pergunte algo para a IA...';
-      if (e.error === 'not-allowed') {
-        iaAddMsg('❌ Permissão de microfone negada. Clique no cadeado na barra do navegador e permita o microfone.', 'ia');
-      }
-    };
-
-    _micRec.start();
-  }
-
   async function iaEnviar() {
     const inp = document.getElementById('iaMsgInput');
     const txt = inp.value.trim();
@@ -2632,141 +2457,36 @@
     const { obj, soma, falta } = iaAtualizarCards();
     const dias = parseInt(document.getElementById('ia_dias').value) || 30;
     const pct  = Math.round((soma / obj) * 100);
-    const porDia    = falta > 0 ? Math.ceil((falta / dias) * 100) / 100 : 0;
-    const porSemana = falta > 0 ? Math.ceil((falta / dias) * 7 * 100) / 100 : 0;
-    const porMes    = falta > 0 ? Math.ceil((falta / dias) * 30 * 100) / 100 : 0;
-    const semanas   = Math.ceil(dias / 7);
+    const porDia = falta > 0 ? Math.ceil((falta / dias) * 100) / 100 : 0;
 
-    // Monta cronograma em HTML — valores calculados pelo JS, não pela IA
-    let semanasHTML = '';
-    for (let s = 1; s <= semanas; s++) {
-      const val = s < semanas ? fmt(porSemana) : fmt(Math.round((falta - porSemana * (semanas - 1)) * 100) / 100);
-      semanasHTML += `<div class="ia-semana-item">Semana ${s}<span>${val}</span></div>`;
-    }
+    const prompt = `Você é um consultor financeiro pessoal brasileiro, especialista em metas de poupança. Fale em português do Brasil, de forma clara, motivadora e objetiva.
 
-    // Renderiza o plano visual imediatamente (sem IA)
-    const box = document.getElementById('iaChatBox');
-    const planoDiv = document.createElement('div');
-    planoDiv.className = 'msg-ia';
-    planoDiv.style.maxWidth = '96%';
-    planoDiv.innerHTML = `<div class="ia-plano">
-      <div class="ia-plano-secao situacao">
-        <div class="ia-plano-titulo">📊 SITUAÇÃO ATUAL</div>
-        <div class="ia-plano-linha destaque">🎯 Meta: <strong>${fmt(obj)}</strong></div>
-        <div class="ia-plano-linha">✅ Acumulado: <strong>${fmt(soma)} (${pct}%)</strong></div>
-        <div class="ia-plano-linha">⏳ Falta: <strong>${fmt(falta)}</strong></div>
-        <div class="ia-plano-linha">📅 Depositando <strong>${fmt(porSemana)}/semana</strong> → meta em <strong>${semanas} semanas (${dias} dias)</strong></div>
-      </div>
-      <div class="ia-plano-secao depositos">
-        <div class="ia-plano-titulo">💰 PLANO DE DEPÓSITOS</div>
-        <div class="ia-plano-linha">Por dia: <strong>${fmt(porDia)}</strong></div>
-        <div class="ia-plano-linha">Por semana: <strong>${fmt(porSemana)}</strong></div>
-        <div class="ia-plano-linha">Por mês: <strong>${fmt(porMes)}</strong></div>
-      </div>
-      <div class="ia-plano-secao cronograma">
-        <div class="ia-plano-titulo">📅 CRONOGRAMA — ${semanas} SEMANAS</div>
-        <div class="ia-semana-grid">${semanasHTML}</div>
-      </div>
-      <div class="ia-plano-secao acoes" id="ia-acoes-bloco">
-        <div class="ia-plano-titulo">⚡ AÇÕES PRÁTICAS</div>
-        <div id="ia-acoes-conteudo" style="opacity:0.5;font-style:italic;font-size:0.85rem;">Gerando dicas personalizadas...</div>
-      </div>
-    </div>`;
-    box.appendChild(planoDiv);
-    // Rola para mostrar o TOPO do plano recém gerado
-    setTimeout(() => planoDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+Dados do usuário:
+- Meta total: ${fmt(obj)}
+- Valor já acumulado: ${fmt(soma)} (${pct}% da meta)
+- Valor que ainda falta: ${fmt(falta)}
+- Prazo desejado: ${dias} dias
+- Valor necessário por dia (modo conservador): ${fmt(porDia)}
 
-    // Pede só as 3 ações práticas para a IA
-    const promptAcoes = `Com base nesses dados financeiros:
-- Meta: ${fmt(obj)}, acumulado: ${fmt(soma)} (${pct}%), falta: ${fmt(falta)}
-- Prazo: ${dias} dias, depósito semanal: ${fmt(porSemana)}
+Com base nesses dados, faça:
+1. Uma análise rápida da situação atual
+2. Um plano semanal conservador e realista para atingir a meta
+3. 3 dicas práticas e específicas para juntar dinheiro mais rápido
+4. Uma mensagem motivacional personalizada
 
-Escreva EXATAMENTE 3 ações práticas e específicas para ajudar a atingir essa meta mais rápido.
-Formato obrigatório (uma por linha, sem introdução):
-1. [ação]
-2. [ação]
-3. [ação]
+Seja direto, use emojis com moderação e formate com bullet points quando útil.`;
 
-Máximo 60 palavras no total. Sem enrolação.`;
-
-    const key = iaGetKey();
-    if (!key) {
-      document.getElementById('ia-acoes-conteudo').innerHTML = '⚠️ Adicione sua chave API Groq para ver as dicas personalizadas.';
-      document.getElementById('ia-acoes-conteudo').style.opacity = '1';
-      document.getElementById('ia-acoes-conteudo').style.fontStyle = 'normal';
-      return;
-    }
-    try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [{ role: 'user', content: promptAcoes }],
-          temperature: 0.7, max_tokens: 200
-        })
-      });
-      const data = await res.json();
-      const acoes = (data.choices?.[0]?.message?.content || '').trim().split('\n').filter(l => l.trim());
-      let acoesHTML = '';
-      acoes.forEach((a, i) => {
-        const txt = a.replace(/^\d+\.\s*/, '');
-        acoesHTML += `<div class="ia-acao-item"><div class="ia-acao-num">${i+1}</div><div>${txt}</div></div>`;
-      });
-      const el = document.getElementById('ia-acoes-conteudo');
-      el.innerHTML = acoesHTML;
-      el.style.opacity = '1';
-      el.style.fontStyle = 'normal';
-    } catch(e) {
-      document.getElementById('ia-acoes-conteudo').innerText = '❌ Erro ao gerar dicas.';
-    }
-    // Após as ações carregarem, rola para mostrar o plano completo do topo
-    setTimeout(() => planoDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    iaAddMsg(`✨ Gerando seu plano personalizado...`, 'ia');
+    await iaChatGroq(prompt, true);
   }
 
   // Chama a API Groq
-  function iaGerarContexto() {
-    const obj    = getObjetivo();
-    let soma = 0;
-    marcados.forEach(i => soma += valorReal(i));
-    const falta  = Math.max(obj - soma, 0);
-    const pct    = Math.round((soma / obj) * 100);
-
-    const movsRaw  = JSON.parse(localStorage.getItem(CHAVE_MOVS) || '[]');
-    const totalEnt = movsRaw.filter(m => m.tipo === 'entrada').reduce((s, m) => s + m.valor, 0);
-    const totalSai = movsRaw.filter(m => m.tipo === 'saida').reduce((s, m) => s + m.valor, 0);
-    const ultMovs  = movsRaw.slice(0, 10).map(m =>
-      `  ${m.tipo === 'entrada' ? '+' : '-'} ${m.desc}: ${fmt(m.valor)} (${m.data})`
-    ).join('\n');
-
-    const cofre = carregarCofre();
-
-    return `Você é uma IA financeira direta e objetiva integrada ao app "Desafio Financeiro".
-
-REGRAS ABSOLUTAS:
-1. Nunca use mais de 200 palavras por resposta.
-2. Nunca explique conceitos básicos que o usuário já sabe.
-3. Nunca sugira "usar o cofre de metas" como dica — o cofre é um REGISTRO AUTOMÁTICO de fases concluídas do desafio, não uma conta separada.
-4. Sempre use os números reais abaixo. Nunca invente ou estime valores.
-5. Seja direto: diagnóstico → número → ação. Sem rodeios.
-
-DADOS DO SISTEMA (tempo real):
-- Meta: ${fmt(obj)}
-- Acumulado no desafio: ${fmt(soma)} (${pct}%)
-- Falta para a meta: ${fmt(falta)}
-- Quadros marcados: ${marcados.size} / ${valores.length}
-- Entradas na poupança: ${fmt(totalEnt)}
-- Saídas na poupança: ${fmt(totalSai)}
-- Saldo poupança: ${fmt(totalEnt - totalSai)}
-- Cofre (fases concluídas): ${cofre.fases.length} fase(s) — total acumulado em fases: ${fmt(cofre.total)}
-- Últimas movimentações:
-${ultMovs || '  (nenhuma ainda)'}`;
-  }
-
   async function iaChatGroq(mensagemUsuario, isPlano) {
     const key = iaGetKey();
     if (!key) {
-      iaAddMsg('⚠️ Configure sua chave API Groq no painel esquerdo.\n\nAcesse console.groq.com, crie uma conta gratuita e gere sua API Key.', 'ia');
+      iaAddMsg('⚠️ Configure sua chave API Groq no painel esquerdo.
+
+Acesse <strong>console.groq.com</strong>, crie uma conta gratuita e gere sua API Key.', 'ia');
       return;
     }
 
@@ -2781,11 +2501,11 @@ ${ultMovs || '  (nenhuma ainda)'}`;
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: 'llama3-8b-8192',
           messages: [
             {
               role: 'system',
-              content: iaGerarContexto()
+              content: 'Você é uma IA financeira pessoal integrada a um sistema de desafio de poupança chamado "Desafio Financeiro". Responda sempre em português do Brasil, de forma clara e objetiva. Foque em orientações práticas sobre poupar dinheiro, atingir metas financeiras e controle financeiro pessoal.'
             },
             { role: 'user', content: mensagemUsuario }
           ],
@@ -2803,7 +2523,8 @@ ${ultMovs || '  (nenhuma ainda)'}`;
       }
 
       const resposta = data.choices[0].message.content;
-      typing.innerHTML = resposta.replace(/\n/g, '<br>');
+      typing.innerHTML = resposta.replace(/
+/g, '<br>');
       typing.classList.remove('msg-typing');
 
     } catch(e) {
@@ -2970,6 +2691,14 @@ ${ultMovs || '  (nenhuma ainda)'}`;
       fecharModalCofre();
     }
   }
+
+  // ── Renderiza ao carregar (todas as funções já definidas aqui) ──
+  expandirSeNecessario();
+  renderGrid();
+  (function() {
+    const sel = document.getElementById('temaSelect');
+    if (sel) sel.value = localStorage.getItem('tema_desafio') || 'escuro';
+  })();
 </script>
 
 <!-- ══ MODAL: EDITAR COFRE DE METAS ══ -->
