@@ -976,7 +976,7 @@
     <div class="tabs">
       <button class="tab-btn active" onclick="mudarAba('desafio')">🎯 Desafio</button>
       <button class="tab-btn"        onclick="mudarAba('poupanca')">🏦 Poupança</button>
-      <button class="tab-btn"        onclick="mudarAba('calculadora')">🧮 Calculadora</button>
+      <button class="tab-btn" id="btnCalcTopbar" onclick="toggleCalculadora()">🧮 Calculadora</button>
       <button class="tab-btn"        onclick="mudarAba('ia')" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border-color:#7c3aed;">🤖 IA</button>
       <button class="tab-btn"        onclick="mudarAba('config')">⚙️ Conta</button>
     </div>
@@ -1177,12 +1177,25 @@
   </div><!-- fim tabConfig -->
 
   <!-- ══ ABA: CALCULADORA ══ -->
-  <div class="tab-panel" id="tabCalculadora">
-  <div style="display:flex;flex:1;align-items:center;justify-content:center;background:var(--bg);overflow:auto;padding:20px;">
+  <!-- ══ MODAL FLUTUANTE: CALCULADORA ══ -->
+  <div id="modalCalculadora" style="
+    display:none; position:fixed; inset:0; z-index:2000;
+    align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.5);"
+    onclick="if(event.target===this) fecharCalculadora()">
     <div style="
       background:var(--surface);border:1px solid var(--border);
       border-radius:20px;padding:24px;width:320px;
-      box-shadow:0 8px 32px rgba(0,0,0,.3);">
+      box-shadow:0 16px 48px rgba(0,0,0,.6);position:relative;">
+
+      <!-- Botão fechar -->
+      <button onclick="fecharCalculadora()" style="
+        position:absolute;top:12px;right:14px;
+        background:none;border:none;color:var(--muted);
+        font-size:1.3rem;cursor:pointer;line-height:1;
+        transition:color 0.2s;"
+        onmouseover="this.style.color='#ef4444'"
+        onmouseout="this.style.color='var(--muted)'">✕</button>
 
       <!-- Display -->
       <div style="
@@ -1194,36 +1207,25 @@
 
       <!-- Botões -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-
-        <!-- Linha 1 -->
         <button class="cbtn cbtn-fn" onclick="calcAc()">AC</button>
         <button class="cbtn cbtn-fn" onclick="calcSign()">+/-</button>
         <button class="cbtn cbtn-fn" onclick="calcPct()">%</button>
         <button class="cbtn cbtn-op" onclick="calcOp('÷')">÷</button>
-
-        <!-- Linha 2 -->
         <button class="cbtn cbtn-num" onclick="calcNum('7')">7</button>
         <button class="cbtn cbtn-num" onclick="calcNum('8')">8</button>
         <button class="cbtn cbtn-num" onclick="calcNum('9')">9</button>
         <button class="cbtn cbtn-op" onclick="calcOp('×')">×</button>
-
-        <!-- Linha 3 -->
         <button class="cbtn cbtn-num" onclick="calcNum('4')">4</button>
         <button class="cbtn cbtn-num" onclick="calcNum('5')">5</button>
         <button class="cbtn cbtn-num" onclick="calcNum('6')">6</button>
         <button class="cbtn cbtn-op" onclick="calcOp('-')">−</button>
-
-        <!-- Linha 4 -->
         <button class="cbtn cbtn-num" onclick="calcNum('1')">1</button>
         <button class="cbtn cbtn-num" onclick="calcNum('2')">2</button>
         <button class="cbtn cbtn-num" onclick="calcNum('3')">3</button>
         <button class="cbtn cbtn-op" onclick="calcOp('+')">+</button>
-
-        <!-- Linha 5 -->
         <button class="cbtn cbtn-num" onclick="calcNum('0')" style="grid-column:span 2;text-align:left;padding-left:22px;">0</button>
         <button class="cbtn cbtn-num" onclick="calcVirgula()">,</button>
         <button class="cbtn cbtn-eq" onclick="calcIgual()">=</button>
-
       </div>
 
       <!-- Histórico -->
@@ -1237,7 +1239,6 @@
 
     </div>
   </div>
-  </div><!-- fim tabCalculadora -->
 
   <!-- ══ ABA: IA FINANCEIRA ══ -->
   <div class="tab-panel" id="tabIa">
@@ -2827,9 +2828,23 @@ ${ultMovs || '  (nenhuma ainda)'}`;
     }
   }
 
-  // Suporte ao teclado na aba calculadora
+  // ── Funções do modal calculadora ──
+  function toggleCalculadora() {
+    const m = document.getElementById('modalCalculadora');
+    const btn = document.getElementById('btnCalcTopbar');
+    const aberto = m.style.display === 'flex';
+    m.style.display = aberto ? 'none' : 'flex';
+    btn.classList.toggle('active', !aberto);
+  }
+
+  function fecharCalculadora() {
+    document.getElementById('modalCalculadora').style.display = 'none';
+    document.getElementById('btnCalcTopbar').classList.remove('active');
+  }
+
+  // Suporte ao teclado na calculadora (modal aberto)
   document.addEventListener('keydown', function(e) {
-    if (!document.getElementById('tabCalculadora').classList.contains('active')) return;
+    if (document.getElementById('modalCalculadora').style.display !== 'flex') return;
     if (e.key >= '0' && e.key <= '9') { calcNum(e.key); e.preventDefault(); }
     else if (e.key === ',' || e.key === '.') { /* virgula automatica */ e.preventDefault(); }
     else if (e.key === '+') { calcOp('+'); e.preventDefault(); }
