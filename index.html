@@ -1207,26 +1207,33 @@
 
       <!-- Botões -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <!-- Linha 1: AC  +/-  %  ⌫ -->
         <button class="cbtn cbtn-fn" onclick="calcAc()">AC</button>
         <button class="cbtn cbtn-fn" onclick="calcSign()">+/-</button>
         <button class="cbtn cbtn-fn" onclick="calcPct()">%</button>
-        <button class="cbtn cbtn-op" onclick="calcOp('÷')">÷</button>
+        <button class="cbtn cbtn-fn" onclick="calcBack()" style="font-size:1.4rem;">⌫</button>
+        <!-- Linha 2: 7  8  9  ÷ -->
         <button class="cbtn cbtn-num" onclick="calcNum('7')">7</button>
         <button class="cbtn cbtn-num" onclick="calcNum('8')">8</button>
         <button class="cbtn cbtn-num" onclick="calcNum('9')">9</button>
-        <button class="cbtn cbtn-op" onclick="calcOp('×')">×</button>
+        <button class="cbtn cbtn-op" onclick="calcOp('÷')">÷</button>
+        <!-- Linha 3: 4  5  6  × -->
         <button class="cbtn cbtn-num" onclick="calcNum('4')">4</button>
         <button class="cbtn cbtn-num" onclick="calcNum('5')">5</button>
         <button class="cbtn cbtn-num" onclick="calcNum('6')">6</button>
-        <button class="cbtn cbtn-op" onclick="calcOp('-')">−</button>
+        <button class="cbtn cbtn-op" onclick="calcOp('×')">×</button>
+        <!-- Linha 4: 1  2  3  − -->
         <button class="cbtn cbtn-num" onclick="calcNum('1')">1</button>
         <button class="cbtn cbtn-num" onclick="calcNum('2')">2</button>
         <button class="cbtn cbtn-num" onclick="calcNum('3')">3</button>
-        <button class="cbtn cbtn-op" onclick="calcOp('+')">+</button>
+        <button class="cbtn cbtn-op" onclick="calcOp('-')">−</button>
+        <!-- Linha 5: 0  ,  .  + -->
         <button class="cbtn cbtn-num" onclick="calcNum('0')">0</button>
         <button class="cbtn cbtn-num" onclick="calcVirgula()">,</button>
         <button class="cbtn cbtn-num" onclick="calcPonto()">.</button>
-        <button class="cbtn cbtn-eq" onclick="calcIgual()">=</button>
+        <button class="cbtn cbtn-op" onclick="calcOp('+')">+</button>
+        <!-- Linha 6: = (largura total) -->
+        <button class="cbtn cbtn-eq" onclick="calcIgual()" style="grid-column:span 4;">=</button>
       </div>
 
       <!-- Histórico -->
@@ -2464,6 +2471,16 @@
     document.getElementById('calcExpr').innerText = ' ';
     document.querySelectorAll('.cbtn-op').forEach(b => b.classList.remove('ativo'));
     document.getElementById('calcDisplay').innerText = '0';
+  }
+
+  function calcBack() {
+    if (_cNovo) return;
+    if (_cStr.length > 1) {
+      _cStr = _cStr.slice(0, -1);
+    } else {
+      _cStr = '0';
+    }
+    _cAtualizar();
   }
 
   function calcSign() {
