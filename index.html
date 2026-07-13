@@ -1554,20 +1554,17 @@
       gerarQuadros(objSalvo);
       document.getElementById('configScreen').style.display = 'none';
       // Verifica sessão ativa (timeout de 10 minutos)
-      const _agora       = Date.now();
-      const _sessao      = JSON.parse(sessionStorage.getItem('desafio_sessao_v1') || 'null');
-      const _TIMEOUT_MS  = 10 * 60 * 1000; // 10 minutos
-      if (_sessao && (_agora - _sessao.ts) < _TIMEOUT_MS) {
-        // Sessão ainda válida — renova e entra direto
+      // Usa setTimeout para garantir que todas as funções já estão definidas
+      const _agora      = Date.now();
+      const _sessao     = JSON.parse(sessionStorage.getItem('desafio_sessao_v1') || 'null');
+      const _TIMEOUT_MS_INIT = 10 * 60 * 1000;
+      if (_sessao && (_agora - _sessao.ts) < _TIMEOUT_MS_INIT) {
         sessionStorage.setItem('desafio_sessao_v1', JSON.stringify({u: _sessao.u, p: _sessao.p, ts: _agora}));
-        USUARIOS = carregarUsuarios();
-        if (USUARIOS[_sessao.u] && USUARIOS[_sessao.u] === _sessao.p) {
-          _entrarDashboard(_sessao.u, _sessao.p);
-          return;
-        }
+        // Adia para depois que todo o script estiver carregado
+        window._autoLoginSessao = { u: _sessao.u, p: _sessao.p };
+      } else {
+        sessionStorage.removeItem('desafio_sessao_v1');
       }
-      // Sessão expirada ou inexistente — limpa e vai para login
-      sessionStorage.removeItem('desafio_sessao_v1');
       document.getElementById('loginScreen').style.display = 'flex';
     }
   })();
@@ -3042,6 +3039,19 @@ ${ultMovs || '  (nenhuma ainda)'}`;
       atualizarCardCofre();
       fecharModalCofre();
     }
+  }
+
+  // ── Auto-login por sessão válida — executado depois de todas as funções definidas ──
+  if (window._autoLoginSessao) {
+    const _al = window._autoLoginSessao;
+    USUARIOS = carregarUsuarios();
+    if (USUARIOS[_al.u] && USUARIOS[_al.u] === _al.p) {
+      document.getElementById('loginScreen').style.display = 'none';
+      _entrarDashboard(_al.u, _al.p);
+    } else {
+      sessionStorage.removeItem('desafio_sessao_v1');
+    }
+    delete window._autoLoginSessao;
   }
 </script>
 
