@@ -1223,8 +1223,9 @@
         <button class="cbtn cbtn-num" onclick="calcNum('2')">2</button>
         <button class="cbtn cbtn-num" onclick="calcNum('3')">3</button>
         <button class="cbtn cbtn-op" onclick="calcOp('+')">+</button>
-        <button class="cbtn cbtn-num" onclick="calcNum('0')" style="grid-column:span 2;text-align:left;padding-left:22px;">0</button>
+        <button class="cbtn cbtn-num" onclick="calcNum('0')">0</button>
         <button class="cbtn cbtn-num" onclick="calcVirgula()">,</button>
+        <button class="cbtn cbtn-num" onclick="calcPonto()">.</button>
         <button class="cbtn cbtn-eq" onclick="calcIgual()">=</button>
       </div>
 
@@ -2402,6 +2403,12 @@
   }
 
   function calcVirgula() {
+    if (_cNovo) { _cStr = '0,'; _cNovo = false; }
+    else if (!_cStr.includes(',')) _cStr += ',';
+    _cAtualizar();
+  }
+
+  function calcPonto() {
     if (_cNovo) { _cStr = '0,'; _cNovo = false; }
     else if (!_cStr.includes(',')) _cStr += ',';
     _cAtualizar();
