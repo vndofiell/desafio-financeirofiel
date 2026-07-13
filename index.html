@@ -2409,8 +2409,8 @@
   }
 
   function calcPonto() {
-    if (_cNovo) { _cStr = '0,'; _cNovo = false; }
-    else if (!_cStr.includes(',')) _cStr += ',';
+    if (_cNovo) { _cStr = '0.'; _cNovo = false; }
+    else if (!_cStr.includes('.') && !_cStr.includes(',')) _cStr += '.';
     _cAtualizar();
   }
 
