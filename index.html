@@ -2380,19 +2380,19 @@
   let _cNovo     = false;    // próximo dígito começa número novo
   let _cHist     = [];       // histórico
 
-  // Converte string de digitação (virgula = decimal) para float
+  // Converte string de digitação para float (suporta vírgula e ponto como decimal)
   function _cValor() {
-    return parseFloat((_cStr || '0').replace(',', '.')) || 0;
+    // Remove pontos de milhar (ex: "1.234,5" → "1234,5") depois troca vírgula por ponto
+    const s = (_cStr || '0').replace(/\./g, '').replace(',', '.');
+    return parseFloat(s) || 0;
   }
 
-  // Formata float para exibição pt-BR
+  // Formata float para exibição — sem separador de milhar para não quebrar _cValor
   function _cFmtNum(n) {
     if (!isFinite(n)) return 'Erro';
-    const hasDec = (n % 1 !== 0);
-    return n.toLocaleString('pt-BR', {
-      minimumFractionDigits: hasDec ? 2 : 0,
-      maximumFractionDigits: 8
-    });
+    // Usa notação simples: troca ponto decimal por vírgula, sem milhar
+    const s = n.toFixed(10).replace(/\.?0+$/, ''); // remove zeros desnecessários
+    return s.replace('.', ',');
   }
 
   function _cAtualizar() {
