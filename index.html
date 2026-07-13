@@ -1553,51 +1553,64 @@
       CHAVE_E = 'desafio_v4_extras_'   + objSalvo;
       gerarQuadros(objSalvo);
       document.getElementById('configScreen').style.display = 'none';
-      // Verifica "Lembrar de mim" — faz auto-login se não clicou Sair
-      const lembrado = localStorage.getItem('desafio_lembrar_v1');
-      const saiu     = sessionStorage.getItem('desafio_saiu');
-      if (lembrado && !saiu) {
-        try {
-          const {u, p} = JSON.parse(lembrado);
-          USUARIOS = carregarUsuarios();
-          if (USUARIOS[u] && USUARIOS[u] === p) {
-            _entrarDashboard(u, p);
-            return;
-          }
-        } catch(e) { localStorage.removeItem('desafio_lembrar_v1'); }
+      // Verifica sessão ativa (timeout de 10 minutos)
+      const _agora       = Date.now();
+      const _sessao      = JSON.parse(sessionStorage.getItem('desafio_sessao_v1') || 'null');
+      const _TIMEOUT_MS  = 10 * 60 * 1000; // 10 minutos
+      if (_sessao && (_agora - _sessao.ts) < _TIMEOUT_MS) {
+        // Sessão ainda válida — renova e entra direto
+        sessionStorage.setItem('desafio_sessao_v1', JSON.stringify({u: _sessao.u, p: _sessao.p, ts: _agora}));
+        USUARIOS = carregarUsuarios();
+        if (USUARIOS[_sessao.u] && USUARIOS[_sessao.u] === _sessao.p) {
+          _entrarDashboard(_sessao.u, _sessao.p);
+          return;
+        }
       }
+      // Sessão expirada ou inexistente — limpa e vai para login
+      sessionStorage.removeItem('desafio_sessao_v1');
       document.getElementById('loginScreen').style.display = 'flex';
-      // Pré-preenche o usuário se lembrar de mim estiver ativo
-      if (lembrado) {
-        try {
-          const {u} = JSON.parse(lembrado);
-          document.getElementById('inUser').value = u;
-          document.getElementById('chkLembrar').checked = true;
-        } catch(e) {}
-      }
     }
   })();
+
+  // ── Sessão: renova o timestamp a cada interação do usuário ──
+  const _TIMEOUT_MS = 10 * 60 * 1000; // 10 minutos
+  let _sessaoTimer = null;
+
+  function _renovarSessao() {
+    const s = JSON.parse(sessionStorage.getItem('desafio_sessao_v1') || 'null');
+    if (!s) return;
+    s.ts = Date.now();
+    sessionStorage.setItem('desafio_sessao_v1', JSON.stringify(s));
+    // Reinicia o timer
+    clearTimeout(_sessaoTimer);
+    _sessaoTimer = setTimeout(_expirarSessao, _TIMEOUT_MS);
+  }
+
+  function _expirarSessao() {
+    sessionStorage.removeItem('desafio_sessao_v1');
+    // Força volta para o login
+    document.getElementById('dashScreen').style.display  = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('inUser').value = '';
+    document.getElementById('inPass').value = '';
+    document.getElementById('loginErr').style.color = '#fb923c';
+    document.getElementById('loginErr').innerText = '⏱ Sessão expirada. Faça login novamente.';
+  }
 
   // ── Login ──
   function fazerLogin() {
     const u = document.getElementById('inUser').value.trim();
     const p = document.getElementById('inPass').value;
-    const lembrar = document.getElementById('chkLembrar').checked;
 
-    // Recarrega usuários do localStorage na hora do login (garante dados frescos)
     USUARIOS = carregarUsuarios();
 
     if (USUARIOS[u] && USUARIOS[u] === p) {
-      // Limpa a flag de "saiu" — próximo refresh faz auto-login normalmente
-      sessionStorage.removeItem('desafio_saiu');
-      // Salva ou limpa o "Lembrar de mim"
-      if (lembrar) {
-        localStorage.setItem('desafio_lembrar_v1', JSON.stringify({u, p}));
-      } else {
-        localStorage.removeItem('desafio_lembrar_v1');
-      }
+      // Inicia sessão com timestamp
+      sessionStorage.setItem('desafio_sessao_v1', JSON.stringify({u, p, ts: Date.now()}));
+      document.getElementById('loginErr').innerText = '';
       _entrarDashboard(u, p);
     } else {
+      document.getElementById('loginErr').style.color = '#f87171';
       document.getElementById('loginErr').innerText = '❌ Usuário ou senha incorretos.';
     }
   }
@@ -1606,6 +1619,12 @@
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('dashScreen').style.display  = 'flex';
       document.getElementById('userLabel').innerText = '👤 ' + u;
+      // Inicia/renova timer de sessão
+      clearTimeout(_sessaoTimer);
+      _sessaoTimer = setTimeout(_expirarSessao, _TIMEOUT_MS);
+      // Renova sessão a cada clique/toque na página
+      document.removeEventListener('click', _renovarSessao);
+      document.addEventListener('click', _renovarSessao);
       // Ensure keys match the saved goal before loading data
       const _obj = parseFloat(localStorage.getItem(CHAVE_OBJ_INICIAL)) || window._objetivoAtual || 6000;
       CHAVE_M = 'desafio_v4_marcados_' + _obj;
@@ -1629,8 +1648,8 @@
   }
 
   function sair() {
-    // Marca na sessão que o usuário clicou Sair — impede auto-login no refresh
-    sessionStorage.setItem('desafio_saiu', '1');
+    clearTimeout(_sessaoTimer);
+    sessionStorage.removeItem('desafio_sessao_v1');
     document.getElementById('dashScreen').style.display  = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
     // Se "Lembrar de mim" está ativo, pré-preenche o usuário mas limpa a senha
